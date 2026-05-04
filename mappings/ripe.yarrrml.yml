@@ -1,0 +1,1371 @@
+# Research Integrity Provenance and Evidence Knowledge Graph (RIPE-KG) - YARRRML mappings
+# Maps assessments_yarrrml.json -> RIPE-KG triples using RIPE-O terms
+# Mapping version: 1.0.0
+# Source: assessments/assessments_yarrrml.json
+
+prefixes:
+  ripe: "https://w3id.org/ripe/ripe-o#"
+  ripekg: "https://w3id.org/ripe/ripe-kg/"
+  tido: "https://w3id.org/tido#"
+  prov: "http://www.w3.org/ns/prov#"
+  dcterms: "http://purl.org/dc/terms/"
+  prism: "http://prismstandard.org/namespaces/basic/3.0/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  schema: "https://schema.org/"
+  dbo: "http://dbpedia.org/ontology/"
+  cito: "http://purl.org/spar/cito/"
+  fabio: "http://purl.org/spar/fabio/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+  org: "http://www.w3.org/ns/org#"
+  sd: "https://w3id.org/okn/o/sd#"
+  idlab-fn: "https://w3id.org/imec/idlab/function#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"
+
+mappings:
+  # APPLICATION INSTANCES
+
+  inspectAI:
+    sources: &inspectai_static
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[0]"
+    s: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+    po:
+      - [a, ripe:AutomatedAgent]
+      - [a, sd:Software]
+      - [rdfs:label, "INSPECT-AI 1.0.0"]
+      - [dcterms:title, "INSPECT-AI"]
+      - [dcterms:hasVersion, "1.0.0"]
+      - [
+          rdfs:comment,
+          "INSPECT-AI 1.0.0 is the automated software system used to support research integrity assessment in the RIPE-KG.",
+        ]
+      - [sd:hasVersionId, "1.0.0"]
+
+  retractionWatchSource:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/source/retraction-watch"
+    po:
+      - [a, prov:Organization]
+      - [rdfs:label, "Retraction Watch"]
+      - [
+          rdfs:comment,
+          "Retraction Watch is represented as an external data source used by INSPECT-AI to retrieve publication notices.",
+        ]
+      - [foaf:name, "Retraction Watch Database"]
+      - p: foaf:homepage
+        o:
+          value: "https://retractionwatch.com"
+          type: iri
+
+  pubPeerSource:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/source/pubpeer"
+    po:
+      - [a, prov:Organization]
+      - [rdfs:label, "PubPeer"]
+      - [
+          rdfs:comment,
+          "PubPeer is represented as an external data source used by INSPECT-AI to retrieve post-publication peer comments.",
+        ]
+      - [foaf:name, "PubPeer"]
+      - p: foaf:homepage
+        o:
+          value: "https://pubpeer.com"
+          type: iri
+
+  clinicalTrialsGovSource:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/source/clinicaltrials-gov"
+    po:
+      - [a, prov:Organization]
+      - [rdfs:label, "ClinicalTrials.gov"]
+      - [
+          rdfs:comment,
+          "ClinicalTrials.gov is represented as an external registry data source used by INSPECT-AI.",
+        ]
+      - [foaf:name, "ClinicalTrials.gov"]
+      - p: foaf:homepage
+        o:
+          value: "https://clinicaltrials.gov"
+          type: iri
+
+  whoICTRPSource:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/source/who-ictrp"
+    po:
+      - [a, prov:Organization]
+      - [rdfs:label, "WHO ICTRP"]
+      - [
+          rdfs:comment,
+          "The WHO International Clinical Trials Registry Platform is represented as an external registry data source used by INSPECT-AI.",
+        ]
+      - [foaf:name, "WHO International Clinical Trials Registry Platform"]
+      - p: foaf:homepage
+        o:
+          value: "https://trialsearch.who.int"
+          type: iri
+
+  retractionAssessmentQuestion:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/retraction-status/1.0.0"
+    po:
+      - [a, ripe:IntegrityAssessmentQuestion]
+      - [rdfs:label, "1.1. Does the study have an associated retraction?"]
+      - [dcterms:identifier, "1.1"]
+      - [dcterms:title, "retraction status"]
+      - [dcterms:hasVersion, "1.0.0"]
+      - [
+          rdfs:comment,
+          "This integrity assessment question records whether a work has an associated retraction, typically on the basis of retraction notice evidence.",
+        ]
+
+  postPublicationAssessmentQuestion:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/post-publication-notices/1.0.0"
+    po:
+      - [a, ripe:IntegrityAssessmentQuestion]
+      - [
+          rdfs:label,
+          "1.2. Does the study have an associated expression of concern or other relevant post-publication notice?",
+        ]
+      - [dcterms:identifier, "1.2"]
+      - [dcterms:title, "post-publication notices"]
+      - [dcterms:hasVersion, "1.0.0"]
+      - [
+          rdfs:comment,
+          "This integrity assessment question records whether a work has associated expressions of concern, corrections, peer comments, or other relevant post-publication notices.",
+        ]
+
+  researchTeamAssessmentQuestion:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/research-team-related-concerns/1.0.0"
+    po:
+      - [a, ripe:IntegrityAssessmentQuestion]
+      - [
+          rdfs:label,
+          "1.3. Do other studies by the research team highlight causes for concern?",
+        ]
+      - [dcterms:identifier, "1.3"]
+      - [dcterms:title, "research-team-related concerns"]
+      - [dcterms:hasVersion, "1.0.0"]
+      - [
+          rdfs:comment,
+          "This integrity assessment question records whether evidence linked to authors associated with a work indicates concerns arising from other studies by the research team.",
+        ]
+
+  registrationAssessmentQuestion:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/study-registration/1.0.0"
+    po:
+      - [a, ripe:IntegrityAssessmentQuestion]
+      - [
+          rdfs:label,
+          "2.2. Are there concerns relating to the timing or absence of study registration?",
+        ]
+      - [dcterms:identifier, "2.2"]
+      - [dcterms:title, "study registration"]
+      - [dcterms:hasVersion, "1.0.0"]
+      - [
+          rdfs:comment,
+          "This integrity assessment question records whether registry and study-design evidence indicates concerns about the timing or absence of registration for a work.",
+        ]
+
+  overallAssessmentQuestion:
+    sources: *inspectai_static
+    s: "https://w3id.org/ripe/ripe-kg/overall-integrity-assessment-question/1.0.0"
+    po:
+      - [a, ripe:OverallIntegrityAssessmentQuestion]
+      - [rdfs:label, "What is the overall integrity assessment of the study?"]
+      - [dcterms:identifier, "overall"]
+      - [dcterms:title, "overall integrity assessment"]
+      - [dcterms:hasVersion, "1.0.0"]
+      - [
+          rdfs:comment,
+          "This overall integrity assessment question records the final integrity outcome for a work on the basis of the component assessment questions concerning retraction, post-publication notices, research-team-related concerns, and study registration.",
+        ]
+
+  # ASSESSMENT
+
+  assessment:
+    sources: &cases_root
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*]"
+    s: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(id)"
+    po:
+      - [a, ripe:ResearchIntegrityAssessment]
+      - p: ripe:assesses
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:investigates
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/retraction-status/1.0.0"
+          type: iri
+      - p: tido:investigates
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/post-publication-notices/1.0.0"
+          type: iri
+      - p: tido:investigates
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/research-team-related-concerns/1.0.0"
+          type: iri
+      - p: tido:investigates
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/study-registration/1.0.0"
+          type: iri
+      - p: tido:investigates
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/overall-integrity-assessment-question/1.0.0"
+          type: iri
+
+  # WORK
+
+  work:
+    sources: *cases_root
+    s: "$(work_uri)"
+    po:
+      - [a, ripe:Work]
+      - [
+          prism:doi,
+          "$(results.checks.grobid_primary_metadata.payload.work_doi)",
+        ]
+      - [
+          dcterms:title,
+          "$(results.checks.grobid_primary_metadata.payload.main_title)",
+        ]
+      - p: owl:sameAs
+        o:
+          value: "$(results.checks.grobid_primary_metadata.payload.openalex.soa_work_uri)"
+          type: iri
+
+  # PUBLICATION DETAILS (bibliographic metadata as evidence)
+
+  publicationDetails:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/publication-details/$(id)"
+    po:
+      - [a, ripe:PublicationDetails]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(id)"
+          type: iri
+      - [
+          dcterms:title,
+          "$(results.checks.grobid_primary_metadata.payload.main_title)",
+        ]
+      - [
+          prism:publicationDate,
+          "$(results.checks.grobid_primary_metadata.payload.publication_date)",
+        ]
+      - [
+          prism:publicationName,
+          "$(results.checks.grobid_primary_metadata.payload.journal)",
+        ]
+      - [prism:issn, "$(results.checks.grobid_primary_metadata.payload.issn)"]
+      - [prism:eIssn, "$(results.checks.grobid_primary_metadata.payload.eissn)"]
+      - [
+          prism:startingPage,
+          "$(results.checks.grobid_primary_metadata.payload.page_from)",
+        ]
+      - [
+          prism:endingPage,
+          "$(results.checks.grobid_primary_metadata.payload.page_to)",
+        ]
+      - p: dcterms:publisher
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publisher/$(results.checks.grobid_primary_metadata.payload.publisher_id)"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q11_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q11_reviewed_hypothesis_uri)"
+          type: iri
+
+  evaluationUsesPublicationDetails:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publication-details/$(id)"
+          type: iri
+
+  publicationPublisher:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/publisher/$(results.checks.grobid_primary_metadata.payload.publisher_id)"
+    po:
+      - [a, prov:Organization]
+      - [
+          foaf:name,
+          "$(results.checks.grobid_primary_metadata.payload.publisher)",
+        ]
+
+  # AUTHORS
+
+  author:
+    sources: &main_authorships
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.grobid_primary_metadata.payload.ripe_authors[*]"
+    s: "https://w3id.org/ripe/ripe-kg/author/$(ripe_author_id)"
+    po:
+      - [a, ripe:Author]
+      - [foaf:name, "$(canonical_name)"]
+      - [foaf:givenName, "$(forename)"]
+      - [foaf:familyName, "$(surname)"]
+      - p: owl:sameAs
+        o:
+          value: "$(soa_author_uri)"
+          type: iri
+
+  workHasAuthor:
+    sources: *main_authorships
+    s: "$(work_uri)"
+    po:
+      - p: dcterms:creator
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/author/$(ripe_author_id)"
+          type: iri
+
+  authorAffiliation:
+    sources: &author_affiliations
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.grobid_primary_metadata.payload.ripe_author_affiliations[*]"
+    s: "https://w3id.org/ripe/ripe-kg/author/$(ripe_author_id)"
+    po:
+      - p: org:memberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/organization/$(organization_id)"
+          type: iri
+
+  authorAffiliationOrganization:
+    sources: *author_affiliations
+    s: "https://w3id.org/ripe/ripe-kg/organization/$(organization_id)"
+    po:
+      - [a, org:Organization]
+      - [foaf:name, "$(organization_label)"]
+
+  # REVIEWER
+
+  reviewer:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.reviewers.*"
+    s: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(rv_id)"
+    po:
+      - [a, ripe:HumanReviewer]
+      - [dcterms:identifier, "$(rv_id)"]
+      - [dbo:occupation, "$(role)"]
+
+  # RETRACTION NOTICES - Q1.1 (referenced works)
+
+  retractionNoticeRefQ11:
+    sources: &ref_retraction_records
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.retraction_detection.payload.reference_results[*].retractions[*]"
+    s: "https://w3id.org/ripe/ripe-kg/retraction-notice/$(record_id)"
+    po:
+      - [a, ripe:RetractionNotice]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(assessment_id)"
+          type: iri
+      - [prism:doi, "$(retraction_doi)"]
+      - [dcterms:title, "$(title)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_notice.soa_work_uri)"
+          type: iri
+      - [ripe:rationale, "$(reason)"]
+      - [ripe:retractionWatchRecordId, "$(record_id)"]
+      - [prism:publicationDate, "$(retraction_date)"]
+      - [prism:publicationName, "$(journal)"]
+      - p: dcterms:publisher
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/retraction-watch"
+          type: iri
+      - p: cito:retracts
+        o:
+          value: "$(original_work_uri)"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "$(original_work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q11_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q11_reviewed_hypothesis_uri)"
+          type: iri
+
+  retractionNoticeRefQ11Publisher:
+    sources: *ref_retraction_records
+    s: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+    po:
+      - [a, prov:Organization]
+      - [foaf:name, "$(publisher)"]
+
+  evaluationUsesRetractionNoticeRefQ11:
+    sources: *ref_retraction_records
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/retraction-notice/$(record_id)"
+          type: iri
+
+  retractedPaperRefQ11:
+    sources: *ref_retraction_records
+    s: "$(original_work_uri)"
+    po:
+      - [a, ripe:Work]
+      - [prism:doi, "$(original_work_doi)"]
+      - [prism:publicationDate, "$(original_paper_date)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_original.soa_work_uri)"
+          type: iri
+
+  # RETRACTION NOTICES - Q1.1 (main article retracted)
+
+  retractionNoticeMainQ11:
+    sources: &main_retraction_records
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.retraction_detection.payload.main_article_result.retractions[*]"
+    s: "https://w3id.org/ripe/ripe-kg/retraction-notice/$(record_id)"
+    po:
+      - [a, ripe:RetractionNotice]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(assessment_id)"
+          type: iri
+      - [prism:doi, "$(retraction_doi)"]
+      - [dcterms:title, "$(title)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_notice.soa_work_uri)"
+          type: iri
+      - [ripe:rationale, "$(reason)"]
+      - [ripe:retractionWatchRecordId, "$(record_id)"]
+      - [prism:publicationDate, "$(retraction_date)"]
+      - [prism:publicationName, "$(journal)"]
+      - p: dcterms:publisher
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/retraction-watch"
+          type: iri
+      - p: cito:retracts
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q11_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q11_reviewed_hypothesis_uri)"
+          type: iri
+
+  retractionNoticeMainQ11Publisher:
+    sources: *main_retraction_records
+    s: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+    po:
+      - [a, prov:Organization]
+      - [foaf:name, "$(publisher)"]
+
+  evaluationUsesRetractionNoticeMainQ11:
+    sources: *main_retraction_records
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/retraction-notice/$(record_id)"
+          type: iri
+
+  # EXPRESSION OF CONCERN NOTICES - Q1.2
+
+  eocNotice:
+    sources:
+      - &q12_notices
+        access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.eoc_correction_detection.payload.main_article_result.notices[*]"
+    s: "https://w3id.org/ripe/ripe-kg/expression-of-concern/$(record_id)"
+    po:
+      - [a, ripe:ExpressionOfConcern]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(assessment_id)"
+          type: iri
+      - [prism:doi, "$(retraction_doi)"]
+      - [dcterms:title, "$(title)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_notice.soa_work_uri)"
+          type: iri
+      - [ripe:rationale, "$(reason)"]
+      - [ripe:retractionWatchRecordId, "$(record_id)"]
+      - [prism:publicationDate, "$(retraction_date)"]
+      - [prism:publicationName, "$(journal)"]
+      - p: dcterms:publisher
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/retraction-watch"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q12_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q12_reviewed_hypothesis_uri)"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, "$(ripe_notice_type)"]
+        - [grel:valueParameter2, "expression-of-concern"]
+
+  eocNoticePublisher:
+    sources:
+      - *q12_notices
+    s: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+    po:
+      - [a, prov:Organization]
+      - [foaf:name, "$(publisher)"]
+
+  evaluationUsesEocNotice:
+    sources:
+      - *q12_notices
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/expression-of-concern/$(record_id)"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, "$(ripe_notice_type)"]
+        - [grel:valueParameter2, "expression-of-concern"]
+
+  correctionNotice:
+    sources:
+      - *q12_notices
+    s: "https://w3id.org/ripe/ripe-kg/correction-notice/$(record_id)"
+    po:
+      - [a, ripe:CorrectionNotice]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(assessment_id)"
+          type: iri
+      - [prism:doi, "$(retraction_doi)"]
+      - [dcterms:title, "$(title)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_notice.soa_work_uri)"
+          type: iri
+      - [ripe:rationale, "$(reason)"]
+      - [ripe:retractionWatchRecordId, "$(record_id)"]
+      - [prism:publicationDate, "$(retraction_date)"]
+      - [prism:publicationName, "$(journal)"]
+      - p: dcterms:publisher
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/retraction-watch"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q12_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q12_reviewed_hypothesis_uri)"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, "$(ripe_notice_type)"]
+        - [grel:valueParameter2, "correction-notice"]
+
+  evaluationUsesCorrectionNotice:
+    sources:
+      - *q12_notices
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/correction-notice/$(record_id)"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, "$(ripe_notice_type)"]
+        - [grel:valueParameter2, "correction-notice"]
+
+  # PUBPEER - Q1.2 (individual comments)
+
+  peerComment:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.pubpeer_signal_analysis.payload.main_paper_result.scraped_comments.comments[*]"
+    s: "https://w3id.org/ripe/ripe-kg/peer-comment/$(assessment_id)-$(id)"
+    po:
+      - [a, ripe:PeerComment]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/pubpeer"
+          type: iri
+      - p: dcterms:creator
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/author/pubpeer-$(assessment_id)-$(id)"
+          type: iri
+      - [dcterms:date, "$(date)"]
+      - [schema:text, "$(comment)"]
+      - p: fabio:hasURL
+        o:
+          value: "$(pubpeer_url)"
+          datatype: xsd:anyURI
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q12_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q12_reviewed_hypothesis_uri)"
+          type: iri
+
+  peerCommentAuthor:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.pubpeer_signal_analysis.payload.main_paper_result.scraped_comments.comments[*]"
+    s: "https://w3id.org/ripe/ripe-kg/author/pubpeer-$(assessment_id)-$(id)"
+    po:
+      - [a, ripe:Author]
+      - [foaf:name, "$(author)"]
+
+  evaluationUsesPeerComment:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.pubpeer_signal_analysis.payload.main_paper_result.scraped_comments.comments[*]"
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/peer-comment/$(assessment_id)-$(id)"
+          type: iri
+
+  # AUTHOR RETRACTION HISTORY - Q1.3
+
+  authorRetractionNoticeQ13:
+    sources: &author_retraction_records
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.author_retraction_history.payload.author_results[*].retractions[*]"
+    s: "https://w3id.org/ripe/ripe-kg/retraction-notice/$(record_id)"
+    po:
+      - [a, ripe:RetractionNotice]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(assessment_id)"
+          type: iri
+      - [prism:doi, "$(retraction_doi)"]
+      - [dcterms:title, "$(title)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_notice.soa_work_uri)"
+          type: iri
+      - [ripe:rationale, "$(reason)"]
+      - [ripe:retractionWatchRecordId, "$(record_id)"]
+      - [prism:publicationDate, "$(retraction_date)"]
+      - [prism:publicationName, "$(journal)"]
+      - p: dcterms:publisher
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/retraction-watch"
+          type: iri
+      - p: cito:retracts
+        o:
+          value: "$(original_work_uri)"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "$(original_work_uri)"
+          type: iri
+      - p: ripe:concerns
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/author/$(ripe_author_id)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q13_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q13_reviewed_hypothesis_uri)"
+          type: iri
+
+  authorRetractionNoticeQ13Publisher:
+    sources: *author_retraction_records
+    s: "https://w3id.org/ripe/ripe-kg/publisher/$(publisher_id)"
+    po:
+      - [a, prov:Organization]
+      - [foaf:name, "$(publisher)"]
+
+  evaluationUsesAuthorRetractionNoticeQ13:
+    sources: *author_retraction_records
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/retraction-notice/$(record_id)"
+          type: iri
+
+  retractedPaperQ13:
+    sources: *author_retraction_records
+    s: "$(original_work_uri)"
+    po:
+      - [a, ripe:Work]
+      - [prism:doi, "$(original_work_doi)"]
+      - [prism:publicationDate, "$(original_paper_date)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex_original.soa_work_uri)"
+          type: iri
+
+  # REGISTRY EVIDENCE - Q2.2
+
+  registryEvidence:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - [a, ripe:RegistryEvidence]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(id)"
+          type: iri
+      - [
+          ripe:registrationId,
+          "$(results.checks.trial_llm_extraction.payload.trial_id)",
+        ]
+      - [
+          ripe:registryName,
+          "$(results.checks.trial_llm_extraction.payload.registry_type)",
+        ]
+      - p: ripe:registrationLink
+        o:
+          value: "$(results.checks.registry_crosscheck.payload.lookup_results.url)"
+          datatype: xsd:anyURI
+      - [
+          ripe:registrationDate,
+          "$(results.checks.registry_crosscheck.payload.lookup_results.study_first_submit_qc_date)",
+        ]
+      - [
+          ripe:isProspective,
+          "$(results.checks.prospective_registration_analysis.payload.is_prospective)",
+          xsd:boolean,
+        ]
+      - [
+          ripe:registrationAssessmentRationale,
+          "$(results.checks.prospective_registration_analysis.payload.message)",
+        ]
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q22_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q22_reviewed_hypothesis_uri)"
+          type: iri
+
+  registryEvidenceSourceClinicalTrialsGov:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/clinicaltrials-gov"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [
+            grel:valueParameter,
+            "$(results.checks.registry_crosscheck.payload.lookup_results.registry_name)",
+          ]
+        - [grel:valueParameter2, "ClinicalTrials.gov"]
+
+  registryEvidenceSourceWHOICTRPCTRI:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/who-ictrp"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [
+            grel:valueParameter,
+            "$(results.checks.registry_crosscheck.payload.lookup_results.registry_name)",
+          ]
+        - [grel:valueParameter2, "CTRI (via WHO ICTRP)"]
+
+  registryEvidenceSourceWHOICTRPEUCTR:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/who-ictrp"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [
+            grel:valueParameter,
+            "$(results.checks.registry_crosscheck.payload.lookup_results.registry_name)",
+          ]
+        - [grel:valueParameter2, "EU CTR (via WHO ICTRP)"]
+
+  registryEvidenceSourceWHOICTRPIRCT:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/who-ictrp"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [
+            grel:valueParameter,
+            "$(results.checks.registry_crosscheck.payload.lookup_results.registry_name)",
+          ]
+        - [grel:valueParameter2, "IRCT (via WHO ICTRP)"]
+
+  registryEvidenceSourceWHOICTRPISRCTN:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/who-ictrp"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [
+            grel:valueParameter,
+            "$(results.checks.registry_crosscheck.payload.lookup_results.registry_name)",
+          ]
+        - [grel:valueParameter2, "ISRCTN (via WHO ICTRP)"]
+
+  registryEvidenceSourceWHOICTRPPACTR:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+    po:
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/source/who-ictrp"
+          type: iri
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [
+            grel:valueParameter,
+            "$(results.checks.registry_crosscheck.payload.lookup_results.registry_name)",
+          ]
+        - [grel:valueParameter2, "PACTR (via WHO ICTRP)"]
+
+  evaluationUsesRegistryEvidence:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/registry-evidence/$(id)"
+          type: iri
+
+  # STUDY DESIGN EVIDENCE - Q2.2
+
+  studyDesignEvidence:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/study-design-evidence/$(id)"
+    po:
+      - [a, ripe:StudyDesignEvidence]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(id)"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(id)"
+          type: iri
+      - [
+          ripe:recruitmentStartDate,
+          "$(results.checks.timeline_consistency.payload.recruitment_start.normalized_date)",
+        ]
+      - [
+          ripe:recruitmentStartDateExtractionRationale,
+          "$(results.checks.timeline_consistency.payload.recruitment_start.interpretation_comment)",
+        ]
+      - [
+          ripe:recruitmentEndDate,
+          "$(results.checks.timeline_consistency.payload.recruitment_finish.normalized_date)",
+        ]
+      - [
+          ripe:recruitmentEndDateExtractionRationale,
+          "$(results.checks.timeline_consistency.payload.recruitment_finish.interpretation_comment)",
+        ]
+      - [
+          ripe:studyEndDate,
+          "$(results.checks.timeline_consistency.payload.study_end_date.normalized_date)",
+        ]
+      - [
+          ripe:studyEndDateExtractionRationale,
+          "$(results.checks.timeline_consistency.payload.study_end_date.interpretation_comment)",
+        ]
+      - p: ripe:concerns
+        o:
+          value: "$(work_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q22_automated_hypothesis_uri)"
+          type: iri
+      - p: tido:supports
+        o:
+          value: "$(q22_reviewed_hypothesis_uri)"
+          type: iri
+
+  evaluationUsesStudyDesignEvidence:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(id)"
+    po:
+      - p: prov:used
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/study-design-evidence/$(id)"
+          type: iri
+
+  # HYPOTHESES - 5 RQs x 2 agents (automated + human)
+
+  q11Auto:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q11_automated_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-inspectai-1-1"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(automated_judgement)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/retraction-status/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+  q11Reviewed:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q11_reviewed_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-human-1-1"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(reviewed_judgement)"]
+      - [ripe:rationale, "$(comment)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/retraction-status/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(reviewer_rv_id)"
+          type: iri
+  q12Auto:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q12_automated_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-inspectai-1-2"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(automated_judgement)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/post-publication-notices/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+  q12Reviewed:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q12_reviewed_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-human-1-2"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(reviewed_judgement)"]
+      - [ripe:rationale, "$(comment)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/post-publication-notices/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(reviewer_rv_id)"
+          type: iri
+  q13Auto:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q13_automated_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-inspectai-1-3"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(automated_judgement)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/research-team-related-concerns/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+  q13Reviewed:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q13_reviewed_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-human-1-3"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(reviewed_judgement)"]
+      - [ripe:rationale, "$(comment)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/research-team-related-concerns/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(reviewer_rv_id)"
+          type: iri
+  q22Auto:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q22_automated_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-inspectai-2-2"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(automated_judgement)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/study-registration/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+  q22Reviewed:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.q22_reviewed_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-human-2-2"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(reviewed_judgement)"]
+      - [ripe:rationale, "$(comment)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/integrity-assessment-question/study-registration/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(reviewer_rv_id)"
+          type: iri
+  overallAuto:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.overall_automated_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-inspectai-overall"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(automated_judgement)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/overall-integrity-assessment-question/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+  overallReviewed:
+    sources:
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.inspect_sr.overall_reviewed_answered[*]"
+    s: "https://w3id.org/ripe/ripe-kg/integrity-assessment-hypothesis/$(assessment_id)-human-overall"
+    po:
+      - [a, ripe:IntegrityAssessmentHypothesis]
+      - p: prov:wasMemberOf
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(assessment_id)"
+          type: iri
+      - [ripe:resultOutcome, "$(reviewed_judgement)"]
+      - [ripe:rationale, "$(comment)"]
+      - p: tido:answers
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/overall-integrity-assessment-question/1.0.0"
+          type: iri
+      - p: prov:wasGeneratedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evaluation/$(assessment_id)"
+          type: iri
+      - p: prov:wasAttributedTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(reviewer_rv_id)"
+          type: iri
+  # EVALUATIONS (PROV-O Activities)
+
+  evaluation:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/evaluation/$(id)"
+    po:
+      - [a, tido:Evaluation]
+      - [prov:startedAtTime, "$(created_at_xsd)", xsd:dateTime]
+      - [prov:endedAtTime, "$(updated_at_xsd)", xsd:dateTime]
+      - p: prov:wasAssociatedWith
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+      - p: prov:wasAssociatedWith
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/human-reviewer/$(reviewer_rv_id)"
+          type: iri
+      - p: tido:contributesTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(id)"
+          type: iri
+      - p: prov:wasInformedBy
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(id)"
+          type: iri
+
+  # EVIDENCE AGGREGATION (PROV-O Activity)
+
+  evidenceAggregation:
+    sources: *cases_root
+    s: "https://w3id.org/ripe/ripe-kg/evidence-aggregation/$(id)"
+    po:
+      - [a, ripe:EvidenceAggregation]
+      - [prov:startedAtTime, "$(created_at_xsd)", xsd:dateTime]
+      - p: prov:wasAssociatedWith
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/automated-agent/inspect-ai/1.0.0"
+          type: iri
+      - p: tido:contributesTo
+        o:
+          value: "https://w3id.org/ripe/ripe-kg/research-integrity-assessment/$(id)"
+          type: iri
+
+  # REFERENCED WORKS - Citation Graph (cito:cites)
+
+  referencedWork:
+    sources: &mapped_references
+      - access: assessments/assessments_yarrrml.json
+        referenceFormulation: jsonpath
+        iterator: "$.assessments[*].results.checks.grobid_reference_metadata.payload.references_for_mapping[*]"
+    s: "$(reference_work_uri)"
+    po:
+      - [a, ripe:Work]
+      - [prism:doi, "$(work_doi)"]
+      - [dcterms:title, "$(title)"]
+      - p: owl:sameAs
+        o:
+          value: "$(openalex.soa_work_uri)"
+          type: iri
+
+  mainWorkCitesRef:
+    sources: *mapped_references
+    s: "$(source_work_uri)"
+    po:
+      - p: cito:cites
+        o:
+          value: "$(reference_work_uri)"
+          type: iri

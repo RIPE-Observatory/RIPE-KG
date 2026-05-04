@@ -1,0 +1,2103 @@
+{
+  "_comment": "Generated from ui/src/lib/ontology-data.json for the embedded RIPE-KG WebVOWL viewer.",
+  "header": {
+    "languages": [
+      "en"
+    ],
+    "baseIris": [
+      "https://w3id.org/ripe/ripe-o"
+    ],
+    "title": {
+      "en": "RIPE-O and InspectAI application profile"
+    },
+    "iri": "https://w3id.org/ripe/ripe-o#",
+    "version": "1.0.0",
+    "description": {
+      "en": "Combined RIPE-O and InspectAI ontology view used by the RIPE-KG application."
+    }
+  },
+  "namespace": [
+    {
+      "name": "cito",
+      "iri": "http://purl.org/spar/cito/"
+    },
+    {
+      "name": "dcterms",
+      "iri": "http://purl.org/dc/terms/"
+    },
+    {
+      "name": "fabio",
+      "iri": "http://purl.org/spar/fabio/"
+    },
+    {
+      "name": "foaf",
+      "iri": "http://xmlns.com/foaf/0.1/"
+    },
+    {
+      "name": "org",
+      "iri": "http://www.w3.org/ns/org#"
+    },
+    {
+      "name": "owl",
+      "iri": "http://www.w3.org/2002/07/owl#"
+    },
+    {
+      "name": "prov",
+      "iri": "http://www.w3.org/ns/prov#"
+    },
+    {
+      "name": "ripe",
+      "iri": "https://w3id.org/ripe/ripe-o#"
+    },
+    {
+      "name": "sd",
+      "iri": "https://w3id.org/okn/o/sd#"
+    },
+    {
+      "name": "tido",
+      "iri": "https://w3id.org/tido#"
+    },
+    {
+      "name": "xsd",
+      "iri": "http://www.w3.org/2001/XMLSchema#"
+    }
+  ],
+  "class": [
+    {
+      "id": "0",
+      "type": "owl:Class"
+    },
+    {
+      "id": "1",
+      "type": "owl:Class"
+    },
+    {
+      "id": "2",
+      "type": "owl:Class"
+    },
+    {
+      "id": "3",
+      "type": "owl:Class"
+    },
+    {
+      "id": "4",
+      "type": "owl:Class"
+    },
+    {
+      "id": "5",
+      "type": "owl:Class"
+    },
+    {
+      "id": "6",
+      "type": "owl:Class"
+    },
+    {
+      "id": "7",
+      "type": "owl:Class"
+    },
+    {
+      "id": "8",
+      "type": "owl:Class"
+    },
+    {
+      "id": "9",
+      "type": "owl:Class"
+    },
+    {
+      "id": "10",
+      "type": "owl:Class"
+    },
+    {
+      "id": "11",
+      "type": "owl:Class"
+    },
+    {
+      "id": "12",
+      "type": "owl:Class"
+    },
+    {
+      "id": "13",
+      "type": "owl:Class"
+    },
+    {
+      "id": "14",
+      "type": "owl:Class"
+    },
+    {
+      "id": "15",
+      "type": "owl:Class"
+    },
+    {
+      "id": "16",
+      "type": "owl:Class"
+    },
+    {
+      "id": "17",
+      "type": "owl:Class"
+    },
+    {
+      "id": "18",
+      "type": "owl:Class"
+    },
+    {
+      "id": "19",
+      "type": "owl:Class"
+    },
+    {
+      "id": "20",
+      "type": "owl:Class"
+    },
+    {
+      "id": "21",
+      "type": "owl:Class"
+    },
+    {
+      "id": "22",
+      "type": "owl:Class"
+    },
+    {
+      "id": "23",
+      "type": "owl:Class"
+    },
+    {
+      "id": "24",
+      "type": "owl:Class"
+    },
+    {
+      "id": "25",
+      "type": "owl:Class"
+    },
+    {
+      "id": "26",
+      "type": "owl:Class"
+    },
+    {
+      "id": "27",
+      "type": "owl:Class"
+    },
+    {
+      "id": "28",
+      "type": "owl:Class"
+    },
+    {
+      "id": "29",
+      "type": "owl:Class"
+    },
+    {
+      "id": "30",
+      "type": "owl:Class"
+    },
+    {
+      "id": "31",
+      "type": "owl:Class"
+    },
+    {
+      "id": "32",
+      "type": "owl:Class"
+    },
+    {
+      "id": "33",
+      "type": "owl:Class"
+    },
+    {
+      "id": "34",
+      "type": "owl:Class"
+    },
+    {
+      "id": "35",
+      "type": "owl:Class"
+    },
+    {
+      "id": "36",
+      "type": "rdfs:Datatype"
+    },
+    {
+      "id": "37",
+      "type": "rdfs:Datatype"
+    },
+    {
+      "id": "38",
+      "type": "rdfs:Datatype"
+    }
+  ],
+  "classAttribute": [
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#Author",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Author",
+        "en": "Author"
+      },
+      "id": "0",
+      "comment": {
+        "en": "A ripe:Author is a prov:Person and foaf:Person representing a person primarily responsible for a resource represented in a ripe:ResearchIntegrityAssessment. Such resources may include works and other pieces of information, such as peer comments. The author of a journal article or the person named as responsible for a peer comment are examples of ripe:Author."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#AutomatedAgent",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "AutomatedAgent",
+        "en": "AutomatedAgent"
+      },
+      "id": "1",
+      "comment": {
+        "en": "A ripe:AutomatedAgent is a prov:SoftwareAgent representing a software agent that participates in a ripe:ResearchIntegrityAssessment by gathering evidence, deriving assessment-relevant information, or producing initial outcomes. A software that can perform ripe:EvidenceAggregation and produce ripe:IntegrityAssessmentHypothesis instances without human intervention is modeled as a ripe:AutomatedAgent."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#CorrectionNotice",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "CorrectionNotice",
+        "en": "CorrectionNotice"
+      },
+      "id": "2",
+      "comment": {
+        "en": "A ripe:CorrectionNotice is a fabio:Correction and ripe:IntegrityAssessmentEvidence representing a formal correction notice about a ripe:Work and used as evidence in a ripe:ResearchIntegrityAssessment. For example, an erratum correcting a published article is a ripe:CorrectionNotice."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#EvidenceAggregation",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "EvidenceAggregation",
+        "en": "EvidenceAggregation"
+      },
+      "id": "3",
+      "comment": {
+        "en": "A ripe:EvidenceAggregation is a prov:Activity representing the aggregation of evidence and source records used in a ripe:ResearchIntegrityAssessment. It provides provenance for the evidence collected for one ripe:ResearchIntegrityAssessment. Retrieval of registry records and publication notices for one assessed work is one such activity."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#ExpressionOfConcern",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "ExpressionOfConcern",
+        "en": "ExpressionOfConcern"
+      },
+      "id": "4",
+      "comment": {
+        "en": "A ripe:ExpressionOfConcern is a fabio:Comment and ripe:IntegrityAssessmentEvidence representing a formal journal or publisher notice that raises concerns about a ripe:Work and is used as evidence in a ripe:ResearchIntegrityAssessment. For example, a publisher notice questioning the reliability of a trial report is an expression of concern."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#HumanReviewer",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "HumanReviewer",
+        "en": "HumanReviewer"
+      },
+      "id": "5",
+      "comment": {
+        "en": "A ripe:HumanReviewer is a prov:Person and foaf:Person representing a human agent who participates in a ripe:ResearchIntegrityAssessment by evaluating evidence and recording ripe:IntegrityAssessmentHypothesis instances. A systematic reviewer investigating research integrity of a study is a ripe:HumanReviewer."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#IntegrityAssessmentEvidence",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "IntegrityAssessmentEvidence",
+        "en": "IntegrityAssessmentEvidence"
+      },
+      "id": "6",
+      "comment": {
+        "en": "A ripe:IntegrityAssessmentEvidence is a tido:Evidence item used to support, challenge, or contextualise a ripe:ResearchIntegrityAssessment. Publication metadata, registry evidence, study-design evidence, publication notices, and peer comments used in an integrity assessment are examples of ripe:IntegrityAssessmentEvidence."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#IntegrityAssessmentHypothesis",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "IntegrityAssessmentHypothesis",
+        "en": "IntegrityAssessmentHypothesis"
+      },
+      "id": "7",
+      "comment": {
+        "en": "A ripe:IntegrityAssessmentHypothesis is a tido:Hypothesis that records an automated or human-reviewed answer to a ripe:IntegrityAssessmentQuestion. For example, a reviewer or automated agent may produce a hypothesis that a study has no concerns, some concerns, or serious concerns."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#IntegrityAssessmentQuestion",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "IntegrityAssessmentQuestion",
+        "en": "IntegrityAssessmentQuestion"
+      },
+      "id": "8",
+      "comment": {
+        "en": "A ripe:IntegrityAssessmentQuestion is a tido:RQ and prov:Entity representing one specific integrity-related question investigated within a ripe:ResearchIntegrityAssessment. It is answered by one or more ripe:IntegrityAssessmentHypothesis instances via tido:answers. An example of a ripe:IntegrityAssessmentQuestion is a question asking whether a ripe:Work has an associated retraction."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#OverallIntegrityAssessmentQuestion",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "OverallIntegrityAssessmentQuestion",
+        "en": "OverallIntegrityAssessmentQuestion"
+      },
+      "id": "9",
+      "comment": {
+        "en": "A ripe:OverallIntegrityAssessmentQuestion is a ripe:IntegrityAssessmentQuestion representing the overall integrity question investigated for a ripe:Work within a ripe:ResearchIntegrityAssessment. It is answered by one or more ripe:IntegrityAssessmentHypothesis instances that synthesise the component integrity assessment questions and their corresponding hypotheses."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#PeerComment",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "PeerComment",
+        "en": "PeerComment"
+      },
+      "id": "10",
+      "comment": {
+        "en": "A ripe:PeerComment is a fabio:Comment and ripe:IntegrityAssessmentEvidence representing a post-publication comment from the research community about a ripe:Work and used as evidence in a ripe:ResearchIntegrityAssessment. For example, a PubPeer comment discussing methodological concerns is a ripe:PeerComment."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#PublicationDetails",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "PublicationDetails",
+        "en": "PublicationDetails"
+      },
+      "id": "11",
+      "comment": {
+        "en": "A ripe:PublicationDetails is a fabio:BibliographicMetadata and ripe:IntegrityAssessmentEvidence representing bibliographic metadata describing a ripe:Work. It may record values such as title, publication venue, publisher, identifiers, and publication date. A record containing title, journal, publisher, and publication date for a trial article is one such instance."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#RegistryEvidence",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "RegistryEvidence",
+        "en": "RegistryEvidence"
+      },
+      "id": "12",
+      "comment": {
+        "en": "A ripe:RegistryEvidence is a ripe:IntegrityAssessmentEvidence representing information recorded in a trial registry about a ripe:Work. It may record values such as the registry identifier, registration date, registry name, registry link, and the associated registration assessment rationale. A ClinicalTrials.gov or WHO ICTRP entry associated with the assessed work is one such instance."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#ResearchIntegrityAssessment",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "ResearchIntegrityAssessment",
+        "en": "ResearchIntegrityAssessment"
+      },
+      "id": "13",
+      "comment": {
+        "en": "A ripe:ResearchIntegrityAssessment represents one integrity assessment of a ripe:Work. It brings together the assessed work, the ripe:IntegrityAssessmentQuestion instances investigated for that work, the ripe:IntegrityAssessmentHypothesis instances answering those questions, the ripe:IntegrityAssessmentEvidence instances supporting them, and the activities that generated or reviewed those outcomes. An assessment of a single published clinical trial report is one such instance."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#RetractionNotice",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "RetractionNotice",
+        "en": "RetractionNotice"
+      },
+      "id": "14",
+      "comment": {
+        "en": "A ripe:RetractionNotice is a fabio:RetractionNotice and ripe:IntegrityAssessmentEvidence representing a formal retraction notice used as evidence in a ripe:ResearchIntegrityAssessment. For example, a journal-issued retraction notice for a trial article is a ripe:RetractionNotice."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#StudyDesignEvidence",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "StudyDesignEvidence",
+        "en": "StudyDesignEvidence"
+      },
+      "id": "15",
+      "comment": {
+        "en": "A ripe:StudyDesignEvidence is a ripe:IntegrityAssessmentEvidence representing information about the design and timeline of a study relevant to a ripe:Work. It may record values such as recruitment start, recruitment end, and study end dates, together with rationales supporting those assigned values. A record describing the recruitment and completion timeline of a clinical study is one such instance."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#Work",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Work",
+        "en": "Work"
+      },
+      "id": "16",
+      "comment": {
+        "en": "A ripe:Work is a fabio:Work and prov:Entity representing a publication that is directly assessed or otherwise referred to within a ripe:ResearchIntegrityAssessment. It includes the assessed work itself and other related publications, such as cited works or original articles associated with publication notices. For example, a trial article under review is a ripe:Work."
+      }
+    },
+    {
+      "iri": "http://purl.org/spar/fabio/BibliographicMetadata",
+      "baseIri": "http://purl.org/spar/fabio",
+      "instances": 0,
+      "label": {
+        "IRI-based": "BibliographicMetadata",
+        "en": "BibliographicMetadata"
+      },
+      "id": "17",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://purl.org/spar/fabio/Comment",
+      "baseIri": "http://purl.org/spar/fabio",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Comment",
+        "en": "Comment"
+      },
+      "id": "18",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://purl.org/spar/fabio/Correction",
+      "baseIri": "http://purl.org/spar/fabio",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Correction",
+        "en": "Correction"
+      },
+      "id": "19",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://purl.org/spar/fabio/RetractionNotice",
+      "baseIri": "http://purl.org/spar/fabio",
+      "instances": 0,
+      "label": {
+        "IRI-based": "RetractionNotice",
+        "en": "RetractionNotice"
+      },
+      "id": "20",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://purl.org/spar/fabio/Work",
+      "baseIri": "http://purl.org/spar/fabio",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Work",
+        "en": "Work"
+      },
+      "id": "21",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://xmlns.com/foaf/0.1/Person",
+      "baseIri": "http://xmlns.com/foaf/0.1",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Person",
+        "en": "Person"
+      },
+      "id": "22",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/ns/org#Organization",
+      "baseIri": "http://www.w3.org/ns/org",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Organization",
+        "en": "Organization"
+      },
+      "id": "23",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#Thing",
+      "baseIri": "http://www.w3.org/2002/07/owl",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Thing",
+        "en": "Thing"
+      },
+      "id": "24",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#Entity",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Entity",
+        "en": "Entity"
+      },
+      "id": "25",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#Organization",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Organization",
+        "en": "Organization"
+      },
+      "id": "26",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#Person",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Person",
+        "en": "Person"
+      },
+      "id": "27",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#SoftwareAgent",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "instances": 0,
+      "label": {
+        "IRI-based": "SoftwareAgent",
+        "en": "SoftwareAgent"
+      },
+      "id": "28",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#Activity",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Activity",
+        "en": "Activity"
+      },
+      "id": "29",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#Case",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Case",
+        "en": "Case"
+      },
+      "id": "30",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#Evaluation",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Evaluation",
+        "en": "Evaluation"
+      },
+      "id": "31",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#Evidence",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Evidence",
+        "en": "Evidence"
+      },
+      "id": "32",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#Hypothesis",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "Hypothesis",
+        "en": "Hypothesis"
+      },
+      "id": "33",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#PieceOfInformation",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "PieceOfInformation",
+        "en": "PieceOfInformation"
+      },
+      "id": "34",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/tido#RQ",
+      "baseIri": "https://w3id.org/tido",
+      "instances": 0,
+      "label": {
+        "IRI-based": "RQ",
+        "en": "RQ"
+      },
+      "id": "35",
+      "attributes": [
+        "external"
+      ]
+    },
+    {
+      "iri": "http://www.w3.org/2001/XMLSchema#boolean",
+      "baseIri": "http://www.w3.org/2001/XMLSchema",
+      "instances": 0,
+      "label": {
+        "IRI-based": "boolean",
+        "en": "boolean"
+      },
+      "id": "36"
+    },
+    {
+      "iri": "http://www.w3.org/2001/XMLSchema#string",
+      "baseIri": "http://www.w3.org/2001/XMLSchema",
+      "instances": 0,
+      "label": {
+        "IRI-based": "string",
+        "en": "string"
+      },
+      "id": "37"
+    },
+    {
+      "iri": "http://www.w3.org/2001/XMLSchema#anyURI",
+      "baseIri": "http://www.w3.org/2001/XMLSchema",
+      "instances": 0,
+      "label": {
+        "IRI-based": "anyURI",
+        "en": "anyURI"
+      },
+      "id": "38"
+    }
+  ],
+  "property": [
+    {
+      "id": "0",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "1",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "2",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "3",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "4",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "5",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "6",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "7",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "8",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "9",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "10",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "11",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "12",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "13",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "14",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "15",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "16",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "17",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "18",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "19",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "20",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "21",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "22",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "23",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "24",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "25",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "26",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "27",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "28",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "29",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "30",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "31",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "32",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "33",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "34",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "35",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "36",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "37",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "38",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "39",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "40",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "41",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "42",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "43",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "44",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "45",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "46",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "47",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "48",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "49",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "50",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "51",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "52",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "53",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "54",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "55",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "56",
+      "type": "owl:objectProperty"
+    },
+    {
+      "id": "57",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "58",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "59",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "60",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "61",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "62",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "63",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "64",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "65",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "66",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "67",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "68",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "69",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "70",
+      "type": "owl:datatypeProperty"
+    },
+    {
+      "id": "71",
+      "type": "owl:datatypeProperty"
+    }
+  ],
+  "propertyAttribute": [
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "0",
+      "range": "27",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "0"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "0",
+      "range": "22",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "1"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "1",
+      "range": "28",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "2"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "2",
+      "range": "19",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "3"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "2",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "4"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "3",
+      "range": "29",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "5"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "4",
+      "range": "18",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "6"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "4",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "7"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "5",
+      "range": "27",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "8"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "5",
+      "range": "22",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "9"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "6",
+      "range": "32",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "10"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "7",
+      "range": "33",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "11"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "8",
+      "range": "25",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "12"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "8",
+      "range": "35",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "13"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "9",
+      "range": "8",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "14"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "10",
+      "range": "18",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "15"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "10",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "16"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "11",
+      "range": "17",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "17"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "11",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "18"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "12",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "19"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "13",
+      "range": "30",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "20"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "14",
+      "range": "20",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "21"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "14",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "22"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "15",
+      "range": "6",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "23"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "16",
+      "range": "21",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "24"
+    },
+    {
+      "iri": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "baseIri": "http://www.w3.org/2000/01/rdf-schema",
+      "domain": "16",
+      "range": "25",
+      "label": {
+        "IRI-based": "Subclass of",
+        "en": "Subclass of"
+      },
+      "attributes": [
+        "object",
+        "anonymous"
+      ],
+      "id": "25"
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#assesses",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "13",
+      "range": "16",
+      "label": {
+        "IRI-based": "assesses",
+        "en": "assesses"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "26",
+      "comment": {
+        "en": "Links a research integrity assessment to the work being assessed."
+      }
+    },
+    {
+      "iri": "http://purl.org/spar/cito/cites",
+      "baseIri": "http://purl.org/spar/cito",
+      "domain": "16",
+      "range": "16",
+      "label": {
+        "IRI-based": "cito:cites",
+        "en": "cito:cites"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "27"
+    },
+    {
+      "iri": "http://purl.org/spar/cito/retracts",
+      "baseIri": "http://purl.org/spar/cito",
+      "domain": "14",
+      "range": "16",
+      "label": {
+        "IRI-based": "cito:retracts",
+        "en": "cito:retracts"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "28"
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#concerns",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "6",
+      "range": "16",
+      "label": {
+        "IRI-based": "concerns",
+        "en": "concerns"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "29",
+      "comment": {
+        "en": "Links evidence to the work or author that the evidence concerns."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#concerns",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "6",
+      "range": "0",
+      "label": {
+        "IRI-based": "concerns",
+        "en": "concerns"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "30",
+      "comment": {
+        "en": "Links evidence to the work or author that the evidence concerns."
+      }
+    },
+    {
+      "iri": "http://purl.org/dc/terms/creator",
+      "baseIri": "http://purl.org/dc/terms",
+      "domain": "16",
+      "range": "0",
+      "label": {
+        "IRI-based": "dcterms:creator",
+        "en": "dcterms:creator"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "31"
+    },
+    {
+      "iri": "http://purl.org/dc/terms/creator",
+      "baseIri": "http://purl.org/dc/terms",
+      "domain": "10",
+      "range": "0",
+      "label": {
+        "IRI-based": "dcterms:creator",
+        "en": "dcterms:creator"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "32"
+    },
+    {
+      "iri": "http://purl.org/dc/terms/publisher",
+      "baseIri": "http://purl.org/dc/terms",
+      "domain": "11",
+      "range": "26",
+      "label": {
+        "IRI-based": "dcterms:publisher",
+        "en": "dcterms:publisher"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "33"
+    },
+    {
+      "iri": "http://purl.org/dc/terms/publisher",
+      "baseIri": "http://purl.org/dc/terms",
+      "domain": "14",
+      "range": "26",
+      "label": {
+        "IRI-based": "dcterms:publisher",
+        "en": "dcterms:publisher"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "34"
+    },
+    {
+      "iri": "http://purl.org/dc/terms/publisher",
+      "baseIri": "http://purl.org/dc/terms",
+      "domain": "4",
+      "range": "26",
+      "label": {
+        "IRI-based": "dcterms:publisher",
+        "en": "dcterms:publisher"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "35"
+    },
+    {
+      "iri": "http://purl.org/dc/terms/publisher",
+      "baseIri": "http://purl.org/dc/terms",
+      "domain": "2",
+      "range": "26",
+      "label": {
+        "IRI-based": "dcterms:publisher",
+        "en": "dcterms:publisher"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "36"
+    },
+    {
+      "iri": "http://www.w3.org/ns/org#memberOf",
+      "baseIri": "http://www.w3.org/ns/org",
+      "domain": "0",
+      "range": "23",
+      "label": {
+        "IRI-based": "org:memberOf",
+        "en": "org:memberOf"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "37"
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#sameAs",
+      "baseIri": "http://www.w3.org/2002/07/owl",
+      "domain": "16",
+      "range": "24",
+      "label": {
+        "IRI-based": "owl:sameAs",
+        "en": "owl:sameAs"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "38"
+    },
+    {
+      "iri": "http://www.w3.org/2002/07/owl#sameAs",
+      "baseIri": "http://www.w3.org/2002/07/owl",
+      "domain": "0",
+      "range": "24",
+      "label": {
+        "IRI-based": "owl:sameAs",
+        "en": "owl:sameAs"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "39"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#used",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "31",
+      "range": "6",
+      "label": {
+        "IRI-based": "prov:used",
+        "en": "prov:used"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "40"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasAssociatedWith",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "31",
+      "range": "5",
+      "label": {
+        "IRI-based": "prov:wasAssociatedWith",
+        "en": "prov:wasAssociatedWith"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "41"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasAssociatedWith",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "31",
+      "range": "1",
+      "label": {
+        "IRI-based": "prov:wasAssociatedWith",
+        "en": "prov:wasAssociatedWith"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "42"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasAssociatedWith",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "3",
+      "range": "1",
+      "label": {
+        "IRI-based": "prov:wasAssociatedWith",
+        "en": "prov:wasAssociatedWith"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "43"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasAttributedTo",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "7",
+      "range": "5",
+      "label": {
+        "IRI-based": "prov:wasAttributedTo",
+        "en": "prov:wasAttributedTo"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "44"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasAttributedTo",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "7",
+      "range": "1",
+      "label": {
+        "IRI-based": "prov:wasAttributedTo",
+        "en": "prov:wasAttributedTo"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "45"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasAttributedTo",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "6",
+      "range": "26",
+      "label": {
+        "IRI-based": "prov:wasAttributedTo",
+        "en": "prov:wasAttributedTo"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "46"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "34",
+      "range": "34",
+      "label": {
+        "IRI-based": "prov:wasDerivedFrom",
+        "en": "prov:wasDerivedFrom"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "47"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasGeneratedBy",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "6",
+      "range": "3",
+      "label": {
+        "IRI-based": "prov:wasGeneratedBy",
+        "en": "prov:wasGeneratedBy"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "48"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasGeneratedBy",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "7",
+      "range": "31",
+      "label": {
+        "IRI-based": "prov:wasGeneratedBy",
+        "en": "prov:wasGeneratedBy"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "49"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasInformedBy",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "31",
+      "range": "3",
+      "label": {
+        "IRI-based": "prov:wasInformedBy",
+        "en": "prov:wasInformedBy"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "50"
+    },
+    {
+      "iri": "http://www.w3.org/ns/prov#wasMemberOf",
+      "baseIri": "http://www.w3.org/ns/prov",
+      "domain": "34",
+      "range": "13",
+      "label": {
+        "IRI-based": "prov:wasMemberOf",
+        "en": "prov:wasMemberOf"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "51"
+    },
+    {
+      "iri": "https://w3id.org/tido#answers",
+      "baseIri": "https://w3id.org/tido",
+      "domain": "7",
+      "range": "8",
+      "label": {
+        "IRI-based": "tido:answers",
+        "en": "tido:answers"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "52"
+    },
+    {
+      "iri": "https://w3id.org/tido#contributesTo",
+      "baseIri": "https://w3id.org/tido",
+      "domain": "31",
+      "range": "13",
+      "label": {
+        "IRI-based": "tido:contributesTo",
+        "en": "tido:contributesTo"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "53"
+    },
+    {
+      "iri": "https://w3id.org/tido#contributesTo",
+      "baseIri": "https://w3id.org/tido",
+      "domain": "3",
+      "range": "13",
+      "label": {
+        "IRI-based": "tido:contributesTo",
+        "en": "tido:contributesTo"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "54"
+    },
+    {
+      "iri": "https://w3id.org/tido#investigates",
+      "baseIri": "https://w3id.org/tido",
+      "domain": "13",
+      "range": "8",
+      "label": {
+        "IRI-based": "tido:investigates",
+        "en": "tido:investigates"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "55"
+    },
+    {
+      "iri": "https://w3id.org/tido#supports",
+      "baseIri": "https://w3id.org/tido",
+      "domain": "6",
+      "range": "7",
+      "label": {
+        "IRI-based": "tido:supports",
+        "en": "tido:supports"
+      },
+      "attributes": [
+        "object"
+      ],
+      "id": "56"
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#isProspective",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "12",
+      "range": "36",
+      "label": {
+        "IRI-based": "is prospective",
+        "en": "is prospective"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "57",
+      "comment": {
+        "en": "Records whether a ripe:RegistryEvidence instance supports the judgement that the study was prospectively registered. For example, a value of true indicates that registration was assessed as preceding the relevant study start point."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#rationale",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "34",
+      "range": "37",
+      "label": {
+        "IRI-based": "rationale",
+        "en": "rationale"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "58",
+      "comment": {
+        "en": "Records a textual justification attached to a tido:PieceOfInformation, such as an extracted value or an assessment conclusion. For example, it may store a reviewer note defending a ripe:IntegrityAssessmentHypothesis."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#recruitmentEndDate",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "15",
+      "range": "37",
+      "label": {
+        "IRI-based": "recruitment end date",
+        "en": "recruitment end date"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "59",
+      "comment": {
+        "en": "Records the date value assigned as the participant recruitment end in a ripe:StudyDesignEvidence instance. For example, it may capture an enrolment end date reported in the article text."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#recruitmentEndDateExtractionRationale",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "15",
+      "range": "37",
+      "label": {
+        "IRI-based": "recruitment end date extraction rationale",
+        "en": "recruitment end date extraction rationale"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "60",
+      "comment": {
+        "en": "Records the textual justification for assigning a value to ripe:recruitmentEndDate in a ripe:StudyDesignEvidence instance. For example, the agent responsible for gathering the ripe:recruitmentEndDate may state that the end of enrolment was inferred from the methods described in the study protocol."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#recruitmentStartDate",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "15",
+      "range": "37",
+      "label": {
+        "IRI-based": "recruitment start date",
+        "en": "recruitment start date"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "61",
+      "comment": {
+        "en": "Records the date value assigned as the participant recruitment start in a ripe:StudyDesignEvidence instance. For example, it may capture a month-year or date string when the first participant was enrolled for a study."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#recruitmentStartDateExtractionRationale",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "15",
+      "range": "37",
+      "label": {
+        "IRI-based": "recruitment start date extraction rationale",
+        "en": "recruitment start date extraction rationale"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "62",
+      "comment": {
+        "en": "Records the textual justification for assigning a value to ripe:recruitmentStartDate in a ripe:StudyDesignEvidence instance. For example, it may note that a sentence describing when enrolment began was interpreted as the recruitment start date by the agent responsible."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#registrationAssessmentRationale",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "12",
+      "range": "37",
+      "label": {
+        "IRI-based": "registration assessment rationale",
+        "en": "registration assessment rationale"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "63",
+      "comment": {
+        "en": "Records the textual justification for the registration-status assessment represented by a ripe:RegistryEvidence instance. For example, it may explain that the registry submission date was compared with the recruitment start date."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#registrationDate",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "12",
+      "range": "37",
+      "label": {
+        "IRI-based": "registration date",
+        "en": "registration date"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "64",
+      "comment": {
+        "en": "Records the registration date value associated with a ripe:RegistryEvidence instance. For example, it may store the submission date shown in a ClinicalTrials.gov record."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#registrationId",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "12",
+      "range": "37",
+      "label": {
+        "IRI-based": "registration identifier",
+        "en": "registration identifier"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "65",
+      "comment": {
+        "en": "Records the registry identifier associated with a ripe:RegistryEvidence instance. For example, this may be an NCT or ISRCTN number."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#registrationLink",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "12",
+      "range": "38",
+      "label": {
+        "IRI-based": "registration link",
+        "en": "registration link"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "66",
+      "comment": {
+        "en": "Records the URI of the registry record represented by a ripe:RegistryEvidence instance. For example, it may point to a ClinicalTrials.gov or WHO ICTRP record page."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#registryName",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "12",
+      "range": "37",
+      "label": {
+        "IRI-based": "registry name",
+        "en": "registry name"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "67",
+      "comment": {
+        "en": "Records the name of the trial registry represented by a ripe:RegistryEvidence instance. For example, values may include ClinicalTrials.gov, ISRCTN, or WHO ICTRP."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#resultOutcome",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "7",
+      "range": "37",
+      "label": {
+        "IRI-based": "result outcome",
+        "en": "result outcome"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "68",
+      "comment": {
+        "en": "Records the lexical outcome assigned to a ripe:IntegrityAssessmentHypothesis in answer to a ripe:IntegrityAssessmentQuestion. For example, the agents may assign no-concerns, some-concerns, or serious-concerns in response to a question about the study's integrity."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#retractionWatchRecordId",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "6",
+      "range": "37",
+      "label": {
+        "IRI-based": "retraction watch record identifier",
+        "en": "retraction watch record identifier"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "69",
+      "comment": {
+        "en": "Records the source identifier assigned by the Retraction Watch database to a ripe:IntegrityAssessmentEvidence item when such an identifier is available. In the RIPE-KG, this is used for retraction notices, expressions of concern, and correction notices sourced from Retraction Watch."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#studyEndDate",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "15",
+      "range": "37",
+      "label": {
+        "IRI-based": "study end date",
+        "en": "study end date"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "70",
+      "comment": {
+        "en": "Records the date value assigned as the study end in a ripe:StudyDesignEvidence instance. For example, it may capture a reported study completion or final follow-up date."
+      }
+    },
+    {
+      "iri": "https://w3id.org/ripe/ripe-o#studyEndDateExtractionRationale",
+      "baseIri": "https://w3id.org/ripe/ripe-o",
+      "domain": "15",
+      "range": "37",
+      "label": {
+        "IRI-based": "study end date extraction rationale",
+        "en": "study end date extraction rationale"
+      },
+      "attributes": [
+        "datatype"
+      ],
+      "id": "71",
+      "comment": {
+        "en": "Records the textual justification for assigning a value to ripe:studyEndDate in a ripe:StudyDesignEvidence instance. For example, it may explain why a final follow-up date was treated as the study end date."
+      }
+    }
+  ]
+}

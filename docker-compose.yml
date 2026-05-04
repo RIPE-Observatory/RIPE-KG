@@ -1,0 +1,13 @@
+services:
+  graphdb:
+    image: ontotext/graphdb:10.8.5
+    container_name: ripe_kg_graphdb
+    ports:
+      - "127.0.0.1:7200:7200"
+    volumes:
+      - graphdb_data:/opt/graphdb/home
+      - ./knowledge:/opt/graphdb/home/import
+    restart: unless-stopped
+
+volumes:
+  graphdb_data:

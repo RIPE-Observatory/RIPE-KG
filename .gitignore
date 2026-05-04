@@ -1,0 +1,35 @@
+.python-version
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+*.log
+*.bak
+.git/
+tmp/
+dist/
+main.py
+.uv-cache
+tools/
+.env
+assessments/*.tmp
+
+# Large binary tools
+tools/*.jar
+
+# IDE
+.vscode/
+
+# Documentation
+docs/
+paper/
+DEPLOYMENT.md
+
+# Data files
+sample-data/
+
+# Local production backups
+backups/
+private/
+docker-compose.prod.yml
+ui/tsconfig.tsbuildinfo

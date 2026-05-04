@@ -1,0 +1,8 @@
+[project]
+name = "ripe-kg"
+version = "0.1.0"
+description = "RIPE knowledge graph generation and exploration"
+requires-python = ">=3.11"
+dependencies = [
+    "rdflib>=7.6.0",
+]

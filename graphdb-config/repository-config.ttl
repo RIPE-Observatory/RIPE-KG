@@ -1,0 +1,32 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rep: <http://www.openrdf.org/config/repository#> .
+@prefix sail: <http://www.openrdf.org/config/sail#> .
+@prefix graphdb: <http://www.ontotext.com/config/graphdb#> .
+
+<#ripe> a rep:Repository ;
+    rep:repositoryID "ripe" ;
+    rdfs:label "RIPE Knowledge Graph" ;
+    rep:repositoryImpl [
+        rep:repositoryType "graphdb:SailRepository" ;
+        <http://www.openrdf.org/config/repository/sail#sailImpl> [
+            sail:sailType "graphdb:Sail" ;
+            graphdb:base-URL "https://w3id.org/ripe/ripe-kg/" ;
+            graphdb:check-for-inconsistencies "true" ;
+            graphdb:defaultNS "https://w3id.org/tido#;http://www.w3.org/ns/prov#;http://purl.org/spar/fabio/;http://purl.org/spar/cito/;http://www.w3.org/ns/org#;http://xmlns.com/foaf/0.1/" ;
+            graphdb:disable-sameAs "true" ;
+            graphdb:enable-context-index "true" ;
+            graphdb:enable-literal-index "true" ;
+            graphdb:enablePredicateList "true" ;
+            graphdb:entity-id-size "32" ;
+            graphdb:entity-index-size "10000000" ;
+            graphdb:imports "https://ritten11.github.io/TIDO/release/1.0.0/ontology.owl;https://www.w3.org/ns/prov.owl;https://sparontologies.github.io/fabio/current/fabio.owl;https://sparontologies.github.io/cito/current/cito.owl;https://www.w3.org/ns/org.rdf;https://xmlns.com/foaf/spec/index.rdf" ;
+            graphdb:in-memory-literal-properties "true" ;
+            graphdb:query-limit-results "100000" ;
+            graphdb:query-timeout "30" ;
+            graphdb:read-only "false" ;
+            graphdb:repository-type "file-repository" ;
+            graphdb:ruleset "owl2-rl" ;
+            graphdb:storage-folder "storage" ;
+            graphdb:throw-QueryEvaluationException-on-timeout "true"
+        ]
+    ] .

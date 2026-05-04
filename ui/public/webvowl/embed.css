@@ -1,0 +1,173 @@
+html,
+body,
+main,
+#canvasArea,
+#graph {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #f1eee6 !important;
+}
+
+#logo,
+#menuContainer,
+#containerForLeftSideBar,
+#containerForRightSideBar,
+#leftSideBarCollapseButton,
+#sidebarExpandButton,
+#dragDropContainer,
+#additionalInformationContainer,
+#WarningErrorMessagesContainer,
+#loading-info,
+#browserCheck,
+#detailsArea,
+#swipeBarContainer,
+#scrollRightButton,
+#scrollLeftButton {
+  display: none !important;
+}
+
+#canvasArea {
+  inset: 0 !important;
+  position: absolute !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 0 !important;
+  right: auto !important;
+}
+
+#canvasArea #graph,
+#canvasArea svg {
+  display: block !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  background: #f1eee6 !important;
+}
+
+#zoomSlider {
+  right: 18px !important;
+  bottom: 24px !important;
+}
+
+.class,
+.object,
+.disjoint,
+.equivalentproperty,
+.transitiveproperty,
+.functionalproperty,
+.inversefunctionalproperty,
+.symmetricproperty,
+.allvaluesfromproperty,
+.somevaluesfromproperty,
+.classDraggerNode {
+  fill: #dbeafe !important;
+  stroke: #2563eb !important;
+}
+
+.external,
+.externalproperty {
+  fill: #e7e5e4 !important;
+  stroke: #78716c !important;
+}
+
+.objectproperty,
+.disjointwith,
+.equivalentproperty,
+.transitiveproperty,
+.functionalproperty,
+.inversefunctionalproperty,
+.symmetricproperty,
+.allvaluesfromproperty,
+.somevaluesfromproperty {
+  fill: #fed7aa !important;
+  stroke: #c2410c !important;
+}
+
+.label .datatype,
+.datatypeproperty,
+.addDataPropertyElement,
+.addDataPropertyElement:hover {
+  fill: #bbf7d0 !important;
+  stroke: #15803d !important;
+}
+
+.literal,
+.node .datatype {
+  fill: #fde68a !important;
+  stroke: #d97706 !important;
+}
+
+.rdf,
+.rdfproperty {
+  fill: #e9d5ff !important;
+  stroke: #7e22ce !important;
+}
+
+.class,
+path,
+line,
+.fineline {
+  stroke: #44403c;
+}
+
+marker path {
+  fill: #44403c !important;
+  stroke: #44403c !important;
+}
+
+.subclass,
+.subclassproperty {
+  fill: #f1eee6 !important;
+}
+
+.class.hovered,
+.property.hovered,
+.cardinality.hovered,
+.cardinality.focused,
+.filled.hovered,
+.filled.focused,
+.values-from.filled.hovered,
+.hoveredForEditing,
+.feature,
+.focused,
+path.hovered,
+.searchResultA,
+.searchResultB {
+  stroke: #dc2626 !important;
+}
+
+.class.hovered,
+.property.hovered,
+.filled.hovered,
+.filled.focused,
+.indirect-highlighting,
+.feature:hover,
+.feature_hover {
+  fill: #f97316 !important;
+}
+
+.searchResultA {
+  animation: none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -o-animation: none !important;
+}
+
+.text,
+.subtext,
+.cardinality,
+.external + text,
+.label text,
+.node text {
+  fill: #1c1917 !important;
+  color: #1c1917 !important;
+  text-shadow: none !important;
+}
+
+.white,
+.embedded {
+  fill: #1c1917 !important;
+}
