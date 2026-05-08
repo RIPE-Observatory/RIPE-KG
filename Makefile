@@ -11,7 +11,7 @@ GRAPHDB_FILES := $(RIPE_ONTOLOGY) $(RIPE_DATA)
 CURL := curl --fail --show-error --silent --connect-timeout 5 --max-time 30
 LOAD_CURL := curl --fail --show-error --silent --connect-timeout 5 --max-time 300
 
-.PHONY: all reproduce parse-check graphdb-up graphdb-down graphdb-wait graphdb-recreate graphdb-check-queryable graphdb-load-files graphdb-verify ui-build
+.PHONY: all reproduce parse-check graphdb-up graphdb-down graphdb-wait graphdb-recreate graphdb-check-queryable graphdb-load-files graphdb-verify paper-stats ui-build
 
 all: reproduce
 
@@ -87,6 +87,9 @@ graphdb-verify: graphdb-recreate graphdb-load-files
 		--data 'PREFIX ripe: <https://w3id.org/ripe/ripe-o#> PREFIX tido: <https://w3id.org/tido#> SELECT ?assessments ?tidoCases WHERE { { SELECT (COUNT(DISTINCT ?assessment) AS ?assessments) WHERE { ?assessment a ripe:ResearchIntegrityAssessment . } } { SELECT (COUNT(DISTINCT ?case) AS ?tidoCases) WHERE { ?case a ripe:ResearchIntegrityAssessment, tido:Case . } } }' \
 		| uv run python -c 'import json, sys; b=json.load(sys.stdin)["results"]["bindings"][0]; print("ResearchIntegrityAssessment: " + b["assessments"]["value"] + "; inferred tido:Case: " + b["tidoCases"]["value"])'
 	@echo "GraphDB verification passed"
+
+paper-stats:
+	SPARQL_ENDPOINT="$(SPARQL_ENDPOINT)" scripts/reproduce-paper-stats.sh
 
 ui-build:
 	cd $(UI_DIR) && bun install --frozen-lockfile && bun run check && bun run build
