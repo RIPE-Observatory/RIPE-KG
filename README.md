@@ -1,4 +1,5 @@
 # RIPE-KG - Research Integrity Provenance and Evidence Knowledge Graph
+[![DOI](https://zenodo.org/badge/1212635420.svg)](https://doi.org/10.5281/zenodo.20690734)
 
 RIPE-KG is a knowledge graph of research integrity assessment traces represented using the Research Integrity Provenance and Evidence Ontology (RIPE-O). It connects works being assessed, integrity questions, evidence, automated outputs, human-reviewed outcomes, reviewers, agents, and provenance activities in RDF.
 
