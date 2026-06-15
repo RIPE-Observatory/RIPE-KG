@@ -118,3 +118,7 @@ The published assessment data is pseudonymised. Human reviewers are represented 
 ## License
 
 This work is licensed under the Creative Commons Attribution 4.0 International License. See [LICENSE.md](LICENSE.md) for details.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes to the data, mappings, RDF output, or interface.
