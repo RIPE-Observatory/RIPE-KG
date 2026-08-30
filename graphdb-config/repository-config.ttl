@@ -19,7 +19,8 @@
             graphdb:enablePredicateList "true" ;
             graphdb:entity-id-size "32" ;
             graphdb:entity-index-size "10000000" ;
-            graphdb:imports "https://ritten11.github.io/TIDO/release/1.0.0/ontology.owl;https://www.w3.org/ns/prov.owl;https://sparontologies.github.io/fabio/current/fabio.owl;https://sparontologies.github.io/cito/current/cito.owl;https://www.w3.org/ns/org.rdf;https://xmlns.com/foaf/spec/index.rdf" ;
+            # FaBiO and CiTO use fixed Git revisions because their old current/*.owl URLs were removed.
+            graphdb:imports "https://ritten11.github.io/TIDO/release/1.0.0/ontology.owl;https://www.w3.org/ns/prov.owl;https://raw.githubusercontent.com/sparontologies/fabio/fd256cf292abf768eb69d774f78548b7cad6319b/docs/current/fabio.ttl;https://raw.githubusercontent.com/sparontologies/cito/b4c5b10a8d7b5f0da6ea8a4f3edcc00d7984f9a4/docs/current/cito.ttl;https://www.w3.org/ns/org.rdf;https://xmlns.com/foaf/spec/index.rdf" ;
             graphdb:in-memory-literal-properties "true" ;
             graphdb:query-limit-results "100000" ;
             graphdb:query-timeout "30" ;

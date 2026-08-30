@@ -1,7 +1,13 @@
-RIPE_ONTOLOGY := knowledge/ripe.ttl
-RIPE_DATA := knowledge/ripe-data.ttl
-RIPE_RML := mappings/ripe.rml.ttl
+GRAPHDB_ARTIFACT_ROOT ?= .
+RIPE_ONTOLOGY = $(GRAPHDB_ARTIFACT_ROOT)/knowledge/ripe.ttl
+RIPE_DATA = $(GRAPHDB_ARTIFACT_ROOT)/knowledge/ripe-data.ttl
+RIPE_RML = $(GRAPHDB_ARTIFACT_ROOT)/mappings/ripe.rml.ttl
 UI_DIR := ui
+
+RELEASE_VERSION ?= 1.1.0
+RELEASE_OUTPUT ?= .build/$(RELEASE_VERSION)
+RELEASE_POLICY ?= private/release-policy.json
+REVIEWER_INDEX ?= private/reviewer-index.json
 
 GRAPHDB_BASE ?= http://localhost:7200
 GRAPHDB_REPOSITORY ?= ripe
@@ -11,11 +17,24 @@ GRAPHDB_FILES := $(RIPE_ONTOLOGY) $(RIPE_DATA)
 CURL := curl --fail --show-error --silent --connect-timeout 5 --max-time 30
 LOAD_CURL := curl --fail --show-error --silent --connect-timeout 5 --max-time 300
 
-.PHONY: all reproduce parse-check graphdb-up graphdb-down graphdb-wait graphdb-recreate graphdb-check-queryable graphdb-load-files graphdb-verify paper-stats ui-build
+.PHONY: all reproduce release release-local parse-check graphdb-up graphdb-down graphdb-wait graphdb-recreate graphdb-check-queryable graphdb-load-files graphdb-verify paper-stats ui-build
 
 all: reproduce
 
 reproduce: parse-check
+
+release:
+	@test -n "$(DATABASE_URL)" || (echo "DATABASE_URL is required" >&2; exit 1)
+	@uv run python scripts/release/build.py \
+		--version "$(RELEASE_VERSION)" \
+		--output "$(RELEASE_OUTPUT)" \
+		--policy "$(RELEASE_POLICY)" \
+		--reviewer-index "$(REVIEWER_INDEX)" \
+		--update-reviewer-index
+
+release-local: release
+	@$(MAKE) graphdb-up
+	@$(MAKE) graphdb-verify GRAPHDB_ARTIFACT_ROOT="$(RELEASE_OUTPUT)"
 
 parse-check: $(RIPE_ONTOLOGY) $(RIPE_DATA) $(RIPE_RML)
 	uv run python -c "from pathlib import Path; from rdflib import Graph; [print(f'{path}: {len(Graph().parse(path, format=\"turtle\"))} triples') for path in [Path('knowledge/ripe.ttl'), Path('mappings/ripe.rml.ttl'), Path('knowledge/ripe-data.ttl')]]"
@@ -81,11 +100,12 @@ graphdb-load-files: $(GRAPHDB_FILES)
 graphdb-verify: graphdb-recreate graphdb-load-files
 	@$(CURL) "$(GRAPHDB_BASE)/rest/repositories/$(GRAPHDB_REPOSITORY)" \
 		| uv run python -c 'import json, sys; params=json.load(sys.stdin)["params"]; expected={"ruleset":"owl2-rl","disableSameAs":"true","queryTimeout":"30","throwQueryEvaluationExceptionOnTimeout":"true","queryLimitResults":"100000"}; actual={key: params[key]["value"] for key in expected}; print("GraphDB config:", actual); missing={key: (actual[key], value) for key, value in expected.items() if actual[key] != value}; assert not missing, f"Unexpected GraphDB config: {missing}"'
-	@$(CURL) -X POST "$(SPARQL_ENDPOINT)" \
+	@expected=$$(uv run python -c 'from rdflib import Graph, RDF, URIRef; g=Graph().parse("$(RIPE_DATA)", format="turtle"); print(len(set(g.subjects(RDF.type, URIRef("https://w3id.org/ripe/ripe-o#ResearchIntegrityAssessment")))))'); \
+		$(CURL) -X POST "$(SPARQL_ENDPOINT)" \
 		-H "Content-Type: application/sparql-query" \
 		-H "Accept: application/sparql-results+json" \
 		--data 'PREFIX ripe: <https://w3id.org/ripe/ripe-o#> PREFIX tido: <https://w3id.org/tido#> SELECT ?assessments ?tidoCases WHERE { { SELECT (COUNT(DISTINCT ?assessment) AS ?assessments) WHERE { ?assessment a ripe:ResearchIntegrityAssessment . } } { SELECT (COUNT(DISTINCT ?case) AS ?tidoCases) WHERE { ?case a ripe:ResearchIntegrityAssessment, tido:Case . } } }' \
-		| uv run python -c 'import json, sys; b=json.load(sys.stdin)["results"]["bindings"][0]; print("ResearchIntegrityAssessment: " + b["assessments"]["value"] + "; inferred tido:Case: " + b["tidoCases"]["value"])'
+		| EXPECTED_ASSESSMENTS="$$expected" uv run python -c 'import json, os, sys; b=json.load(sys.stdin)["results"]["bindings"][0]; expected=os.environ["EXPECTED_ASSESSMENTS"]; assessments=b["assessments"]["value"]; cases=b["tidoCases"]["value"]; print(f"ResearchIntegrityAssessment: {assessments}; inferred tido:Case: {cases}"); assert assessments == expected and cases == expected, f"expected {expected}, got assessments={assessments}, tidoCases={cases}"'
 	@echo "GraphDB verification passed"
 
 paper-stats:

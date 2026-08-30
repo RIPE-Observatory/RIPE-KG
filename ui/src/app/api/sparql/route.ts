@@ -1,8 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SPARQL_ENDPOINT =
+const DEFAULT_VERSION = process.env.RIPE_KG_VERSION || "1.1.0";
+const DEFAULT_ENDPOINT =
   process.env.SPARQL_ENDPOINT ||
   "http://localhost:7200/repositories/ripe";
+const VERSION_ENDPOINTS = new Map<string, string | undefined>([
+  ["1.0.0", process.env.SPARQL_ENDPOINT_1_0_0],
+  ["1.1.0", process.env.SPARQL_ENDPOINT_1_1_0],
+]);
+
+function endpointForRequest(request: NextRequest):
+  | { endpoint: string; version: string }
+  | NextResponse {
+  const requestedVersion = request.nextUrl.searchParams.get("version");
+  if (!requestedVersion) {
+    return { endpoint: DEFAULT_ENDPOINT, version: DEFAULT_VERSION };
+  }
+
+  if (!VERSION_ENDPOINTS.has(requestedVersion)) {
+    return NextResponse.json(
+      { error: "Unknown RIPE-KG version", details: "Supported versions are 1.0.0 and 1.1.0" },
+      { status: 400 }
+    );
+  }
+
+  const endpoint = VERSION_ENDPOINTS.get(requestedVersion);
+  if (!endpoint) {
+    return NextResponse.json(
+      { error: "RIPE-KG version unavailable", details: `Version ${requestedVersion} is not configured` },
+      { status: 503 }
+    );
+  }
+
+  return { endpoint, version: requestedVersion };
+}
 
 // 30 second timeout to avoid long-running queries blocking the server
 const QUERY_TIMEOUT_MS = 30000;
@@ -130,6 +161,14 @@ function validateReadOnlyQuery(query: string): NextResponse | null {
     );
   }
 
+  const nonLiteralServicePattern = /\bSERVICE\s+(?:SILENT\s+)?(?:[?$]|[A-Z_][\w.-]*:)/iu;
+  if (nonLiteralServicePattern.test(normalized)) {
+    return NextResponse.json(
+      { error: "Unsupported SERVICE endpoint", details: "SERVICE endpoints must be explicit allowed IRIs" },
+      { status: 400 }
+    );
+  }
+
   const servicePattern = /\bSERVICE\s+(?:SILENT\s+)?<([^>]+)>/giu;
   for (const match of query.matchAll(servicePattern)) {
     const endpoint = match[1];
@@ -148,6 +187,9 @@ export async function POST(request: NextRequest) {
   const limited = rateLimit(request);
   if (limited) return limited;
 
+  const target = endpointForRequest(request);
+  if (target instanceof NextResponse) return target;
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), QUERY_TIMEOUT_MS);
 
@@ -159,7 +201,7 @@ export async function POST(request: NextRequest) {
       return validationError;
     }
 
-    const response = await fetch(SPARQL_ENDPOINT, {
+    const response = await fetch(target.endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/sparql-query",
@@ -184,7 +226,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: { "X-RIPE-KG-Version": target.version },
+    });
   } catch (error) {
     clearTimeout(timeoutId);
 

@@ -1,0 +1,77 @@
+{
+  "release_version": "1.1.0",
+  "pipeline": {
+    "ontology": {
+      "name": "RIPE-O",
+      "version": "1.0.0"
+    },
+    "yarrrml_parser": "@rmlio/yarrrml-parser@1.12.2",
+    "rmlmapper": "8.1.0-r380",
+    "rmlmapper_sha256": "819371d49ca47d8ffddae0f34e95f38e8eaaf588ee023e3c2c7527a14d302f58"
+  },
+  "inputs": {
+    "openalex_cache": {
+      "sha256": "70c932107b2d400abe2d90ead0f67068a9592bce00afce00710308588b6f24b8",
+      "entries": 2971
+    }
+  },
+  "selection": {
+    "completed_jobs_after_start": 344,
+    "source_candidates": 274,
+    "selected_assessments": 185,
+    "selected_reviewers": 22,
+    "excluded_assessment_ids": [
+      "RIPEAB130181AB8867CD3"
+    ],
+    "disallowed_reviewer_names": 5,
+    "disallowed_reviewer_source_ids": 8,
+    "source_snapshot_sha256": "2d8586153a61a764a7c7ee70c3948253a98e47a5b90257976b6bb977f63caf8c",
+    "release_policy_sha256": "db7fe170c561a1adf9cdc7b1d2caca858220d3137ed2058507d6710c04eed179",
+    "reviewer_index_input_sha256": "0641740f62d103253bf46b68c2525f7093abee32aca48f8947dbd35c116c97c4"
+  },
+  "validation": {
+    "assessment_count": 185,
+    "reviewer_count": 22,
+    "source_assessment_count_before_overall_filter": 274,
+    "removed_without_human_reviewed_overall": 89,
+    "ontology_triples": 179,
+    "mapping_triples": 4136,
+    "data_triples": 73228,
+    "rdf_assessment_count": 185,
+    "rdf_reviewer_count": 22
+  },
+  "artifacts": {
+    "assessments/.openalex-cache.json": {
+      "sha256": "70c932107b2d400abe2d90ead0f67068a9592bce00afce00710308588b6f24b8",
+      "bytes": 72403530
+    },
+    "assessments/assessments.json": {
+      "sha256": "9129910cb704d8252b817f7cc4ecf3aad1b0ad426961763287faf2c159d5c5a7",
+      "bytes": 17800720
+    },
+    "assessments/assessments_enriched.json": {
+      "sha256": "ff36d3e68d0846099fdef00a5412d293fe0c6c1241f4a8d91f05f48bef800a18",
+      "bytes": 75138144
+    },
+    "assessments/assessments_yarrrml.json": {
+      "sha256": "f046411ba3eaf4c0aa6158627200a82edc214efb8c3ef061d893953e797d42a6",
+      "bytes": 34800062
+    },
+    "mappings/ripe.yarrrml.yml": {
+      "sha256": "f75348875fc4bdeae50892af4f3a91adf02859ba96f091dc377dce4ecf89900b",
+      "bytes": 47103
+    },
+    "mappings/ripe.rml.ttl": {
+      "sha256": "d91fdb6c6b46494c426a385b4199c6580efc0ef577d6c3aa9449c8c96784e47c",
+      "bytes": 163567
+    },
+    "knowledge/ripe-data.ttl": {
+      "sha256": "4ad5e9d273a861587bd913f7b4edcc77a36f3472cead2525a25375cde21f4faf",
+      "bytes": 5922016
+    },
+    "knowledge/ripe.ttl": {
+      "sha256": "21b1d993ac1d794b51354d3197433b40402f13380686d409d1defb6c5b94a8b4",
+      "bytes": 21935
+    }
+  }
+}

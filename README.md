@@ -9,6 +9,9 @@ The live exploration interface is available at:
 
 [https://ripe-kg.inspectai.app](https://ripe-kg.inspectai.app)
 
+The repository snapshot is **RIPE-KG 1.1.0**, containing 185 assessments
+reviewed by 22 pseudonymous reviewers.
+
 ## Repository Contents
 
 This repository contains the public RIPE-KG snapshot and the files needed to reproduce, load, and inspect it.
@@ -36,14 +39,17 @@ docker-compose.yml            Local GraphDB service
 | `mappings/ripe.yarrrml.yml` | YARRRML mapping specification |
 | `mappings/ripe.rml.ttl` | Generated RML mapping |
 | `graphdb-config/repository-config.ttl` | GraphDB repository configuration |
+| `releases/1.1.0/release-manifest.json` | Release inputs, counts, tool versions, and artifact checksums |
+| `releases/1.1.0/SHA256SUMS` | Independently verifiable checksums for the published artifacts |
 
 ## Requirements
 
 | Tool | Purpose |
 | --- | --- |
-| `uv` | Python dependency management and RDF validation |
-| `bun` | UI dependency management, checks, and build |
-| Docker | Local GraphDB 10.8.5 service |
+| `uv` | Python dependency management, PostgreSQL extraction, and RDF validation |
+| `bun` | YARRRML parsing and UI builds |
+| Java | RMLMapper 8.1.0 execution |
+| Docker | Local PostgreSQL restoration and GraphDB 10.8.5 service |
 
 ## Reproduce the RDF Snapshot
 
@@ -58,6 +64,18 @@ This checks:
 * `knowledge/ripe.ttl`
 * `mappings/ripe.rml.ttl`
 * `knowledge/ripe-data.ttl`
+
+## Build a Release from PostgreSQL
+
+The release scripts and the complete developer guide are in
+[`scripts/release/`](scripts/release/README.md).
+
+```sh
+DATABASE_URL="postgresql://user:password@localhost/inspect_ai" make release-local
+```
+
+This builds the candidate under `.build/<version>/` and verifies it in local
+GraphDB. It does not deploy anything.
 
 ## Load the Knowledge Graph
 
@@ -87,11 +105,22 @@ The live SPARQL interface is available at:
 
 [https://ripe-kg.inspectai.app/sparql](https://ripe-kg.inspectai.app/sparql)
 
-The SPARQL API endpoint is:
+The SPARQL API endpoint for the current release is:
 
 ```text
 https://ripe-kg.inspectai.app/api/sparql
 ```
+
+Published versions can be queried independently:
+
+```text
+https://ripe-kg.inspectai.app/api/sparql?version=1.0.0
+https://ripe-kg.inspectai.app/api/sparql?version=1.1.0
+```
+
+Send a read-only `SELECT` or `ASK` query as the POST body with content type
+`application/sparql-query`. The response includes an `X-RIPE-KG-Version`
+header.
 
 ## Run the UI Locally
 
@@ -103,7 +132,7 @@ cd ui
 SPARQL_ENDPOINT=http://localhost:7200/repositories/ripe bun run dev
 ```
 
-The UI includes publication and author search, assessment pages, the ontology explorer, and the SPARQL workbench used to run the competency questions.
+The UI includes publication and author search, assessment pages, the ontology explorer, and a SPARQL workbench with curated example queries, including a federated SemOpenAlex query.
 
 ## Data Scope
 
