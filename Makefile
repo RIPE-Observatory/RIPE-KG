@@ -17,7 +17,7 @@ GRAPHDB_FILES := $(RIPE_ONTOLOGY) $(RIPE_DATA)
 CURL := curl --fail --show-error --silent --connect-timeout 5 --max-time 30
 LOAD_CURL := curl --fail --show-error --silent --connect-timeout 5 --max-time 300
 
-.PHONY: all reproduce release release-local parse-check graphdb-up graphdb-down graphdb-wait graphdb-recreate graphdb-check-queryable graphdb-load-files graphdb-verify paper-stats ui-build
+.PHONY: all reproduce release release-local parse-check graphdb-up graphdb-down graphdb-wait graphdb-recreate graphdb-check-queryable graphdb-load-files graphdb-verify paper-stats ui-build prepare-downloads load-release
 
 all: reproduce
 
@@ -37,7 +37,7 @@ release-local: release
 	@$(MAKE) graphdb-verify GRAPHDB_ARTIFACT_ROOT="$(RELEASE_OUTPUT)"
 
 parse-check: $(RIPE_ONTOLOGY) $(RIPE_DATA) $(RIPE_RML)
-	uv run python -c "from pathlib import Path; from rdflib import Graph; [print(f'{path}: {len(Graph().parse(path, format=\"turtle\"))} triples') for path in [Path('knowledge/ripe.ttl'), Path('mappings/ripe.rml.ttl'), Path('knowledge/ripe-data.ttl')]]"
+	uv run python -c 'import sys; from rdflib import Graph; [(print(path + ":", len(Graph().parse(path, format="turtle")), "triples")) for path in sys.argv[1:]]' "$(RIPE_ONTOLOGY)" "$(RIPE_RML)" "$(RIPE_DATA)"
 
 graphdb-up:
 	docker compose up -d graphdb
@@ -60,12 +60,15 @@ graphdb-wait:
 	exit 1
 
 graphdb-recreate: graphdb-wait
-	@status=$$(curl --silent --connect-timeout 5 --max-time 30 -o /dev/null -w "%{http_code}" "$(GRAPHDB_BASE)/rest/repositories/$(GRAPHDB_REPOSITORY)" || true); \
+	@case "$(GRAPHDB_REPOSITORY)" in ripe-[0-9]*-[0-9]*-[0-9]*) echo "Refusing to recreate an immutable release repository" >&2; exit 1;; esac
+	@config=$$(mktemp); trap 'rm -f "$$config"' EXIT; \
+	python3 scripts/release/graphdb_config.py "$(GRAPHDB_REPOSITORY)" > "$$config" || exit 1; \
+	status=$$(curl --silent --connect-timeout 5 --max-time 30 -o /dev/null -w "%{http_code}" "$(GRAPHDB_BASE)/rest/repositories/$(GRAPHDB_REPOSITORY)" || true); \
 	if [ "$$status" = "200" ]; then \
 		$(CURL) -X DELETE "$(GRAPHDB_BASE)/rest/repositories/$(GRAPHDB_REPOSITORY)" >/dev/null; \
 		echo "Deleted GraphDB repository $(GRAPHDB_REPOSITORY)"; \
-	fi
-	@$(CURL) -X POST "$(GRAPHDB_BASE)/rest/repositories" -F "config=@graphdb-config/repository-config.ttl" >/dev/null
+	fi; \
+	$(CURL) -X POST "$(GRAPHDB_BASE)/rest/repositories" -F "config=@$$config" >/dev/null
 	@echo "Created GraphDB repository $(GRAPHDB_REPOSITORY)"
 	@$(MAKE) graphdb-check-queryable
 
@@ -109,7 +112,16 @@ graphdb-verify: graphdb-recreate graphdb-load-files
 	@echo "GraphDB verification passed"
 
 paper-stats:
-	SPARQL_ENDPOINT="$(SPARQL_ENDPOINT)" scripts/reproduce-paper-stats.sh
+	GRAPHDB_ARTIFACT_ROOT="$(GRAPHDB_ARTIFACT_ROOT)" SPARQL_ENDPOINT="$(SPARQL_ENDPOINT)" scripts/reproduce-paper-stats.sh
 
-ui-build:
+load-release: prepare-downloads
+	python3 scripts/release/load-graphdb.py --version "$(RELEASE_VERSION)" --base "$(GRAPHDB_BASE)"
+
+prepare-downloads:
+	uv run python scripts/release/prepare-downloads.py
+
+ui-build: prepare-downloads
 	cd $(UI_DIR) && bun install --frozen-lockfile && bun run check && bun run build
+	@mkdir -p $(UI_DIR)/.next/standalone/public $(UI_DIR)/.next/standalone/.next/static
+	@cp -a $(UI_DIR)/public/. $(UI_DIR)/.next/standalone/public/
+	@cp -a $(UI_DIR)/.next/static/. $(UI_DIR)/.next/standalone/.next/static/
