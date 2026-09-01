@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ENDPOINT="${SPARQL_ENDPOINT:-http://localhost:7200/repositories/ripe}"
+ARTIFACT_ROOT="${GRAPHDB_ARTIFACT_ROOT:-.}"
 
 PREFIXES='
 PREFIX ripe:    <https://w3id.org/ripe/ripe-o#>
@@ -23,6 +24,20 @@ query() {
 $2"
 }
 
+# Refuse mixed-version statistics before reading local counts or printing results.
+local_ids=$(mktemp)
+remote_ids=$(mktemp)
+trap 'rm -f "$local_ids" "$remote_ids"' EXIT
+jq -r '.assessments[].id' "$ARTIFACT_ROOT/assessments/assessments_yarrrml.json" | sort -u > "$local_ids"
+curl --fail --show-error --silent --max-time 30 -X POST "$ENDPOINT" \
+  -H 'Content-Type: application/sparql-query' -H 'Accept: application/sparql-results+json' \
+  --data "$PREFIXES SELECT DISTINCT ?assessment WHERE { ?assessment a ripe:ResearchIntegrityAssessment }" \
+  | jq -r '.results.bindings[].assessment.value | split("/")[-1]' | sort -u > "$remote_ids"
+if ! cmp -s "$local_ids" "$remote_ids"; then
+  echo "Assessment IDs differ between local artifacts and endpoint; refusing mixed-version paper statistics." >&2
+  exit 1
+fi
+
 printf '\n## External-reviewer assessment traces\n'
 jq -r '
   ["assessmentTraces", "distinctPublications"],
@@ -31,7 +46,7 @@ jq -r '
     ([.assessments[] | select(.reviewer_rv_id >= "RV001" and .reviewer_rv_id <= "RV012") | .work_uri] | unique | length)
   ]
   | @csv
-' assessments/assessments_yarrrml.json
+' "$ARTIFACT_ROOT/assessments/assessments_yarrrml.json"
 
 query "Assessments in RIPE-KG" '
 SELECT (COUNT(DISTINCT ?assessment) AS ?assessments) WHERE {
@@ -63,7 +78,7 @@ jq -r '
   ["publicationAuthorMentions"],
   [([.assessments[].results.checks.grobid_primary_metadata.payload.main_authors[]] | length)]
   | @csv
-' assessments/assessments_enriched.json
+' "$ARTIFACT_ROOT/assessments/assessments_enriched.json"
 
 query "Distinct RIPE authors of assessed publications" '
 SELECT (COUNT(DISTINCT ?author) AS ?authors) WHERE {
