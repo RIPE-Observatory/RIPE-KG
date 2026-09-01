@@ -1,0 +1,72 @@
+name: ripe-release
+
+services:
+  graphdb:
+    image: ontotext/graphdb:10.8.14@sha256:506096f8b30c44994d457551f668fa1283596cfc7098bdb915f9b6b708ec2f44
+    environment:
+      GDB_HEAP_SIZE: 2g
+    ports:
+      - "127.0.0.1:${RIPE_GRAPHDB_PORT:-17200}:7200"
+    volumes:
+      - graphdb_data:/opt/graphdb/home
+    mem_limit: 4g
+    cpus: 2
+    pids_limit: 512
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--max-time", "5", "http://localhost:7200/rest/repositories"]
+      interval: 15s
+      timeout: 6s
+      retries: 4
+      start_period: 120s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  ui:
+    image: ${RIPE_UI_IMAGE:?Set RIPE_UI_IMAGE to the reviewed image ID or registry digest}
+    environment:
+      GRAPHDB_BASE_URL: http://graphdb:7200
+      RIPE_KG_VERSION: 1.1.0
+      RIPE_TRUST_CF_CONNECTING_IP: ${RIPE_TRUST_CF_CONNECTING_IP:-false}
+    ports:
+      - "127.0.0.1:${RIPE_UI_PORT:-13000}:3000"
+    depends_on:
+      graphdb:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "Promise.all(['1.0.0','1.1.0'].map(v=>fetch('http://127.0.0.1:3000/releases/'+v+'/api/health',{signal:AbortSignal.timeout(5000)}))).then(rs=>process.exit(rs.every(r=>r.ok)?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 7s
+      retries: 3
+      start_period: 120s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  graphdb_data:
