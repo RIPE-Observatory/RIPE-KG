@@ -29,9 +29,8 @@ import {
   ripeKgIri,
 } from "./iri";
 
-const GRAPHDB_URL =
-  process.env.SPARQL_ENDPOINT ||
-  "http://localhost:7200/repositories/ripe";
+import { endpointForVersion } from "./version-endpoints";
+import { requestVersion } from "./request-version";
 
 const QUESTION_VALUE_ROWS = RQ_ORDER.map(
   (rq) => `(<${RQ_IRIS[rq]}> "${rq}")`
@@ -47,15 +46,11 @@ export class SparqlQueryError extends Error {
   constructor(
     message: string,
     readonly status?: number,
-    readonly endpoint = GRAPHDB_URL
+    readonly endpoint?: string
   ) {
     super(message);
     this.name = "SparqlQueryError";
   }
-}
-
-export function isSparqlQueryError(error: unknown): error is SparqlQueryError {
-  return error instanceof SparqlQueryError;
 }
 
 function resourceIri(kind: "assessment" | "author", id: string): string {
@@ -75,9 +70,10 @@ function semOpenAlexAuthorFilter(variable: string): string {
 }
 
 async function serverQuery(sparql: string): Promise<SparqlBinding[]> {
+  const endpoint = endpointForVersion(await requestVersion());
   let res: Response;
   try {
-    res = await fetch(GRAPHDB_URL, {
+    res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/sparql-query",
@@ -85,17 +81,18 @@ async function serverQuery(sparql: string): Promise<SparqlBinding[]> {
       },
       body: sparql,
       cache: "no-store",
+      signal: AbortSignal.timeout(30_000),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown network error";
-    throw new SparqlQueryError(`Could not reach GraphDB at ${GRAPHDB_URL}: ${message}`);
+    throw new SparqlQueryError(`Could not reach GraphDB at ${endpoint}: ${message}`);
   }
 
   if (!res.ok) {
     const details = await res.text().catch(() => "");
     const suffix = details.trim() ? `: ${details.trim()}` : "";
     throw new SparqlQueryError(
-      `SPARQL endpoint ${GRAPHDB_URL} returned ${res.status}${suffix}`,
+      `SPARQL endpoint ${endpoint} returned ${res.status}${suffix}`,
       res.status
     );
   }

@@ -1,3 +1,4 @@
+import type { KgVersion } from "./versions";
 import { executeSparqlQuery } from "./sparql";
 import {
   PREFIXES,
@@ -12,14 +13,15 @@ import { RIPE_KG_BASE, SEMOPENALEX_AUTHOR_BASE } from "./iri";
 
 export * from "./sparql-types";
 
-async function query(sparql: string): Promise<SparqlBinding[]> {
-  const result = await executeSparqlQuery(sparql);
-  return result.results.bindings;
+async function query(sparql: string, version?: KgVersion): Promise<SparqlBinding[]> {
+  const result = await executeSparqlQuery(sparql, version);
+  return result.results?.bindings ?? [];
 }
 
 export async function searchPublications(
   term: string,
-  limit = 20
+  limit = 20,
+  version?: KgVersion
 ): Promise<PublicationSearchResult[]> {
   const escaped = esc(term);
   const sparql = `${PREFIXES}
@@ -44,7 +46,7 @@ export async function searchPublications(
     ORDER BY DESC(?assessmentCount)
     LIMIT ${limit}`;
 
-  const rows = await query(sparql);
+  const rows = await query(sparql, version);
   return rows.map((r) => ({
     title: val(r, "title"),
     doi: val(r, "doi"),
@@ -55,7 +57,8 @@ export async function searchPublications(
 
 export async function searchAuthors(
   term: string,
-  limit = 20
+  limit = 20,
+  version?: KgVersion
 ): Promise<AuthorSearchResult[]> {
   const escaped = esc(term);
   const sparql = `${PREFIXES}
@@ -80,7 +83,7 @@ export async function searchAuthors(
     ORDER BY DESC(?assessmentCount)
     LIMIT ${limit}`;
 
-  const rows = await query(sparql);
+  const rows = await query(sparql, version);
   return rows.map((r) => ({
     name: val(r, "name"),
     authorId: val(r, "authorId"),
