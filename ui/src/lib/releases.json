@@ -1,0 +1,20 @@
+{
+  "1.0.0": {
+    "assessments": 140,
+    "publications": 95,
+    "reviewers": 15,
+    "ontology": "1.0.0",
+    "data_triples": 59630,
+    "source_commit": "2c9bbffb77cf605e99ce6b8791cf4aa6087894f6",
+    "data_sha256": "e45c35cf80666461739e669733099a1533be699520016a2109fca7c8eadd8444"
+  },
+  "1.1.0": {
+    "assessments": 185,
+    "publications": 119,
+    "reviewers": 22,
+    "ontology": "1.0.0",
+    "data_triples": 73228,
+    "source_commit": "5a6941209767bdf34114dbfe43196db47d9f764f",
+    "data_sha256": "4ad5e9d273a861587bd913f7b4edcc77a36f3472cead2525a25375cde21f4faf"
+  }
+}
