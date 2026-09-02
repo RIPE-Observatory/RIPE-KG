@@ -1,20 +1,23 @@
-const SPARQL_API = "/api/sparql";
+import { releasePath, type KgVersion } from "./versions";
 
 import { type SparqlBinding } from "./sparql-types";
 export type { SparqlBinding };
 
 export interface SparqlResults {
-  head: { vars: string[] };
-  results: { bindings: SparqlBinding[] };
+  head: { vars?: string[] };
+  results?: { bindings: SparqlBinding[] };
+  boolean?: boolean;
+  metadata?: { rowLimit: number; limitReached: boolean };
 }
 
-export async function executeSparqlQuery(query: string): Promise<SparqlResults> {
-  const response = await fetch(SPARQL_API, {
+export async function executeSparqlQuery(query: string, version?: KgVersion): Promise<SparqlResults> {
+  const response = await fetch(version ? releasePath(version, "/api/sparql") : "/api/sparql", {
     method: "POST",
     headers: {
-      "Content-Type": "text/plain",
+      "Content-Type": "application/sparql-query",
     },
     body: query,
+    signal: AbortSignal.timeout(35_000),
   });
 
   if (!response.ok) {
@@ -26,96 +29,281 @@ export async function executeSparqlQuery(query: string): Promise<SparqlResults> 
   return response.json();
 }
 
-export interface CompetencyQuestion {
-  id: string;
-  title: string;
-  query: string;
+export interface QueryGroup {
+  label: string;
+  queries: { name: string; query: string }[];
 }
 
-export const COMPETENCY_QUESTIONS: CompetencyQuestion[] = [
+export const QUERY_GROUPS: QueryGroup[] = [
+  {
+    label: "Overview",
+    queries: [
       {
-        id: "CQ1",
-        title: "What research work has been assessed?",
+        name: "Assessed Works",
         query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
-PREFIX prov:     <http://www.w3.org/ns/prov#>
-PREFIX prism:    <http://prismstandard.org/namespaces/basic/3.0/>
-PREFIX dcterms:  <http://purl.org/dc/terms/>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX prism:   <http://prismstandard.org/namespaces/basic/3.0/>
 
-SELECT DISTINCT ?work ?doi ?title ?publicationDate ?journal WHERE {
+SELECT ?assessment ?work ?doi ?title ?publicationDate ?journal
+WHERE {
   ?assessment a ripe:ResearchIntegrityAssessment ;
               ripe:assesses ?work .
-  ?publication a ripe:PublicationDetails ;
-               prov:wasMemberOf ?assessment ;
-               dcterms:title ?title .
-  OPTIONAL { ?work prism:doi ?doi }
-  OPTIONAL { ?publication prism:publicationDate ?publicationDate }
-  OPTIONAL { ?publication prism:publicationName ?journal }
+  ?work prism:doi ?doi .
+  OPTIONAL { ?work dcterms:title ?title }
+  OPTIONAL {
+    ?publication a ripe:PublicationDetails ;
+                 prov:wasMemberOf ?assessment .
+    OPTIONAL { ?publication dcterms:title ?title }
+    OPTIONAL { ?publication prism:publicationDate ?publicationDate }
+    OPTIONAL { ?publication prism:publicationName ?journal }
+  }
 }
-ORDER BY DESC(BOUND(?doi)) ?doi ?title ?work
-LIMIT 3`,
+ORDER BY ?doi ?assessment
+LIMIT 10`,
       },
       {
-        id: "CQ2",
-        title: "What assessments, when, and by whom have been performed for this work?",
+        name: "Overall Integrity Assessments",
         query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:   <https://w3id.org/tido#>
-PREFIX prov:   <http://www.w3.org/ns/prov#>
-PREFIX prism:  <http://prismstandard.org/namespaces/basic/3.0/>
+PREFIX tido:  <https://w3id.org/tido#>
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
 
-SELECT DISTINCT ?assessment ?started ?ended ?agent WHERE {
-  ?work prism:doi "10.1016/j.jad.2017.12.049" .
+SELECT ?assessment ?doi ?reviewer ?humanOutcome ?humanRationale
+WHERE {
   ?assessment a ripe:ResearchIntegrityAssessment ;
               ripe:assesses ?work .
+  ?work prism:doi ?doi .
+  ?overallQuestion a ripe:OverallIntegrityAssessmentQuestion .
+  ?hypothesis a ripe:IntegrityAssessmentHypothesis ;
+              tido:answers ?overallQuestion ;
+              ripe:resultOutcome ?humanOutcome ;
+              prov:wasMemberOf ?assessment ;
+              prov:wasAttributedTo ?reviewer .
+  ?reviewer a ripe:HumanReviewer .
+  OPTIONAL { ?hypothesis ripe:rationale ?humanRationale }
+}
+ORDER BY ?doi ?assessment
+LIMIT 10`,
+      },
+      {
+        name: "Evidence Used per Assessment",
+        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
+PREFIX tido:  <https://w3id.org/tido#>
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
+
+SELECT ?assessment ?doi
+       (COUNT(DISTINCT ?notice) AS ?notices)
+       (COUNT(DISTINCT ?comment) AS ?peerComments)
+       (COUNT(DISTINCT ?registry) AS ?registryEvidence)
+       (COUNT(DISTINCT ?studyDesign) AS ?studyDesignEvidence)
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi .
   ?evaluation a tido:Evaluation ;
-              tido:contributesTo ?assessment ;
-              prov:startedAtTime ?started ;
-              prov:endedAtTime ?ended ;
-              prov:wasAssociatedWith ?agent .
+              tido:contributesTo ?assessment .
+  OPTIONAL {
+    ?evaluation prov:used ?notice .
+    VALUES ?noticeType { ripe:RetractionNotice ripe:ExpressionOfConcern ripe:CorrectionNotice }
+    ?notice a ?noticeType .
+  }
+  OPTIONAL { ?evaluation prov:used ?comment . ?comment a ripe:PeerComment }
+  OPTIONAL { ?evaluation prov:used ?registry . ?registry a ripe:RegistryEvidence }
+  OPTIONAL { ?evaluation prov:used ?studyDesign . ?studyDesign a ripe:StudyDesignEvidence }
 }
-ORDER BY ?started ?assessment ?agent
-LIMIT 3`,
+GROUP BY ?assessment ?doi
+ORDER BY ?doi ?assessment
+LIMIT 10`,
+      },
+    ],
+  },
+  {
+    label: "Automated vs Human",
+    queries: [
+      {
+        name: "Outcome Disagreements",
+        query: `PREFIX ripe:  <https://w3id.org/ripe/ripe-o#>
+PREFIX tido: <https://w3id.org/tido#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?assessment ?questionLabel ?automatedOutcome ?humanOutcome ?humanRationale
+WHERE {
+  ?question a ripe:IntegrityAssessmentQuestion ;
+            rdfs:label ?questionLabel .
+  ?automatedHypothesis a ripe:IntegrityAssessmentHypothesis ;
+                       tido:answers ?question ;
+                       ripe:resultOutcome ?automatedOutcome ;
+                       prov:wasMemberOf ?assessment ;
+                       prov:wasAttributedTo ?automatedAgent .
+  ?automatedAgent a ripe:AutomatedAgent .
+  ?humanHypothesis a ripe:IntegrityAssessmentHypothesis ;
+                   tido:answers ?question ;
+                   ripe:resultOutcome ?humanOutcome ;
+                   prov:wasMemberOf ?assessment ;
+                   prov:wasAttributedTo ?reviewer .
+  ?reviewer a ripe:HumanReviewer .
+  OPTIONAL { ?humanHypothesis ripe:rationale ?humanRationale }
+  FILTER(?automatedOutcome != ?humanOutcome)
+}
+ORDER BY ?assessment ?questionLabel
+LIMIT 10`,
       },
       {
-        id: "CQ3",
-        title: "What published third-party evidence, including retraction notices, expressions of concern, corrections, or peer comments, has been used to assess the work?",
-        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:   <https://w3id.org/tido#>
-PREFIX prov:   <http://www.w3.org/ns/prov#>
-PREFIX prism:  <http://prismstandard.org/namespaces/basic/3.0/>
-PREFIX fabio:  <http://purl.org/spar/fabio/>
+        name: "Agreement by Question",
+        query: `PREFIX ripe:  <https://w3id.org/ripe/ripe-o#>
+PREFIX tido: <https://w3id.org/tido#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT DISTINCT ?evidence ?type ?evidenceDoi ?date ?recordId ?url WHERE {
-  ?work prism:doi "10.3109/14767058.2014.954241" .
-  ?assessment ripe:assesses ?work .
+SELECT ?questionLabel
+       (COUNT(*) AS ?comparisons)
+       (SUM(IF(?automatedOutcome = ?humanOutcome, 1, 0)) AS ?agreements)
+       (SUM(IF(?automatedOutcome != ?humanOutcome, 1, 0)) AS ?disagreements)
+WHERE {
+  ?question a ripe:IntegrityAssessmentQuestion ;
+            rdfs:label ?questionLabel .
+  ?automatedHypothesis a ripe:IntegrityAssessmentHypothesis ;
+                       tido:answers ?question ;
+                       ripe:resultOutcome ?automatedOutcome ;
+                       prov:wasMemberOf ?assessment ;
+                       prov:wasAttributedTo ?automatedAgent .
+  ?automatedAgent a ripe:AutomatedAgent .
+  ?humanHypothesis a ripe:IntegrityAssessmentHypothesis ;
+                   tido:answers ?question ;
+                   ripe:resultOutcome ?humanOutcome ;
+                   prov:wasMemberOf ?assessment ;
+                   prov:wasAttributedTo ?reviewer .
+  ?reviewer a ripe:HumanReviewer .
+}
+GROUP BY ?questionLabel
+ORDER BY ?questionLabel`,
+      },
+    ],
+  },
+  {
+    label: "Evidence",
+    queries: [
+      {
+        name: "Third-Party Evidence",
+        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
+PREFIX tido:  <https://w3id.org/tido#>
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+SELECT DISTINCT ?assessment ?doi ?evidence ?evidenceType ?evidenceDoi ?url
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi .
   ?evaluation a tido:Evaluation ;
               tido:contributesTo ?assessment ;
               prov:used ?evidence .
-  VALUES ?type {
-    ripe:RetractionNotice
-    ripe:ExpressionOfConcern
-    ripe:CorrectionNotice
-    ripe:PeerComment
-  }
-  ?evidence a ?type .
+  VALUES ?evidenceType { ripe:RetractionNotice ripe:ExpressionOfConcern ripe:CorrectionNotice ripe:PeerComment }
+  ?evidence a ?evidenceType .
   OPTIONAL { ?evidence prism:doi ?evidenceDoi }
-  OPTIONAL { ?evidence prism:publicationDate ?date }
-  OPTIONAL { ?evidence ripe:retractionWatchRecordId ?recordId }
   OPTIONAL { ?evidence fabio:hasURL ?url }
 }
-ORDER BY ?type ?evidence
-LIMIT 3`,
+ORDER BY ?doi ?assessment ?evidenceType
+LIMIT 10`,
       },
       {
-        id: "CQ4",
-        title: "What authors of this assessed work have been associated with retraction notices for other works?",
-        query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
-PREFIX prism:    <http://prismstandard.org/namespaces/basic/3.0/>
-PREFIX dcterms:  <http://purl.org/dc/terms/>
-PREFIX foaf:     <http://xmlns.com/foaf/0.1/>
-PREFIX cito:     <http://purl.org/spar/cito/>
+        name: "Registration Timing Evidence",
+        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
 
-SELECT DISTINCT ?authorName (COUNT(DISTINCT ?otherWork) AS ?retractedWorks) WHERE {
-  ?work prism:doi "10.1016/j.jad.2017.12.049" ;
+SELECT ?assessment ?doi ?registryName ?registrationId ?registrationDate ?isProspective ?recruitmentStartDate
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi .
+  ?registry a ripe:RegistryEvidence ;
+            prov:wasMemberOf ?assessment ;
+            ripe:concerns ?work .
+  OPTIONAL { ?registry ripe:registryName ?registryName }
+  OPTIONAL { ?registry ripe:registrationId ?registrationId }
+  OPTIONAL { ?registry ripe:registrationDate ?registrationDate }
+  OPTIONAL { ?registry ripe:isProspective ?isProspective }
+  OPTIONAL {
+    ?studyDesign a ripe:StudyDesignEvidence ;
+                 prov:wasMemberOf ?assessment ;
+                 ripe:concerns ?work .
+    OPTIONAL { ?studyDesign ripe:recruitmentStartDate ?recruitmentStartDate }
+  }
+}
+ORDER BY ?doi ?assessment
+LIMIT 10`,
+      },
+      {
+        name: "Peer Comments",
+        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
+PREFIX tido:  <https://w3id.org/tido#>
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+SELECT ?assessment ?doi ?comment ?url
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi .
+  ?evaluation a tido:Evaluation ;
+              tido:contributesTo ?assessment ;
+              prov:used ?comment .
+  ?comment a ripe:PeerComment .
+  OPTIONAL { ?comment fabio:hasURL ?url }
+}
+ORDER BY ?doi ?assessment ?comment
+LIMIT 10`,
+      },
+    ],
+  },
+  {
+    label: "Authors",
+    queries: [
+      {
+        name: "Authors with Concerns",
+        query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
+PREFIX tido:    <https://w3id.org/tido#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX prism:   <http://prismstandard.org/namespaces/basic/3.0/>
+
+SELECT DISTINCT ?author ?authorName ?doi ?outcome
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi ;
+        dcterms:creator ?author .
+  ?author foaf:name ?authorName .
+  ?overallQuestion a ripe:OverallIntegrityAssessmentQuestion .
+  ?hypothesis a ripe:IntegrityAssessmentHypothesis ;
+              tido:answers ?overallQuestion ;
+              ripe:resultOutcome ?outcome ;
+              prov:wasMemberOf ?assessment ;
+              prov:wasAttributedTo ?reviewer .
+  ?reviewer a ripe:HumanReviewer .
+  VALUES ?outcome { "some-concerns" "serious-concerns" }
+}
+ORDER BY ?authorName ?doi
+LIMIT 10`,
+      },
+      {
+        name: "Author Retraction Associations",
+        query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX cito:    <http://purl.org/spar/cito/>
+PREFIX prism:   <http://prismstandard.org/namespaces/basic/3.0/>
+
+SELECT ?doi ?authorName (COUNT(DISTINCT ?otherWork) AS ?retractedWorks)
+WHERE {
+  ?work prism:doi ?doi ;
         dcterms:creator ?author .
   ?author foaf:name ?authorName .
   ?notice a ripe:RetractionNotice ;
@@ -123,169 +311,129 @@ SELECT DISTINCT ?authorName (COUNT(DISTINCT ?otherWork) AS ?retractedWorks) WHER
           cito:retracts ?otherWork .
   FILTER(?otherWork != ?work)
 }
-GROUP BY ?authorName
+GROUP BY ?doi ?authorName
 ORDER BY DESC(?retractedWorks) ?authorName
-LIMIT 3`,
+LIMIT 10`,
       },
       {
-        id: "CQ5",
-        title: "Is the assessed work retrospectively registered and what evidence has been assessed to support this?",
-        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
-PREFIX prov:   <http://www.w3.org/ns/prov#>
-PREFIX prism:  <http://prismstandard.org/namespaces/basic/3.0/>
-
-SELECT DISTINCT ?assessment ?trialId ?registryName ?registrationDate ?isProspective ?rationale ?recruitmentStartDate ?studyEndDate WHERE {
-  ?work prism:doi "10.1016/j.jacl.2015.12.017" .
-  ?assessment ripe:assesses ?work .
-  ?registry a ripe:RegistryEvidence ;
-            prov:wasMemberOf ?assessment ;
-            ripe:registrationId ?trialId ;
-            ripe:registryName ?registryName ;
-            ripe:registrationDate ?registrationDate ;
-            ripe:isProspective ?isProspective ;
-            ripe:registrationAssessmentRationale ?rationale .
-  ?studyDesign a ripe:StudyDesignEvidence ;
-               prov:wasMemberOf ?assessment ;
-               ripe:recruitmentStartDate ?recruitmentStartDate .
-  OPTIONAL { ?studyDesign ripe:studyEndDate ?studyEndDate }
-}
-ORDER BY ?assessment
-`,
-      },
-      {
-        id: "CQ6",
-        title: "What are the automated and human-reviewed outcomes for each integrity question associated with this assessed work?",
-        query: `PREFIX ripe:  <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:  <https://w3id.org/tido#>
-PREFIX prov:  <http://www.w3.org/ns/prov#>
-PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
-PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT DISTINCT ?assessment ?question ?automatedOutcome ?humanOutcome ?humanRationale WHERE {
-  ?work prism:doi "10.1001/jamanetworkopen.2019.14393" .
-  ?assessment ripe:assesses ?work .
-  ?questionNode a ripe:IntegrityAssessmentQuestion ;
-                rdfs:label ?question .
-  ?automated a ripe:IntegrityAssessmentHypothesis ;
-             tido:answers ?questionNode ;
-             ripe:resultOutcome ?automatedOutcome ;
-             prov:wasMemberOf ?assessment ;
-             prov:wasAttributedTo ?automatedAgent .
-  ?automatedAgent a ripe:AutomatedAgent .
-  ?reviewed a ripe:IntegrityAssessmentHypothesis ;
-            tido:answers ?questionNode ;
-            ripe:resultOutcome ?humanOutcome ;
-            prov:wasMemberOf ?assessment ;
-            prov:wasAttributedTo ?reviewer .
-  ?reviewer a ripe:HumanReviewer .
-  OPTIONAL { ?reviewed ripe:rationale ?humanRationale }
-}
-ORDER BY ?assessment ?question
-LIMIT 3`,
-      },
-      {
-        id: "CQ7",
-        title: "For which integrity questions did the human reviewer disagree with the automated outcome, and why?",
-        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:   <https://w3id.org/tido#>
-PREFIX prov:   <http://www.w3.org/ns/prov#>
-PREFIX prism:  <http://prismstandard.org/namespaces/basic/3.0/>
-PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT DISTINCT ?assessment ?doi ?question ?automatedOutcome ?humanOutcome ?humanRationale WHERE {
-  ?assessment ripe:assesses ?work .
-  ?work prism:doi ?doi .
-  ?questionNode a ripe:IntegrityAssessmentQuestion ;
-                rdfs:label ?question .
-  ?automated a ripe:IntegrityAssessmentHypothesis ;
-             tido:answers ?questionNode ;
-             ripe:resultOutcome ?automatedOutcome ;
-             prov:wasMemberOf ?assessment ;
-             prov:wasAttributedTo ?automatedAgent .
-  ?automatedAgent a ripe:AutomatedAgent .
-  ?reviewed a ripe:IntegrityAssessmentHypothesis ;
-            tido:answers ?questionNode ;
-            ripe:resultOutcome ?humanOutcome ;
-            ripe:rationale ?humanRationale ;
-            prov:wasMemberOf ?assessment ;
-            prov:wasAttributedTo ?reviewer .
-  ?reviewer a ripe:HumanReviewer .
-  FILTER(?automatedOutcome != ?humanOutcome)
-}
-ORDER BY ?doi ?question ?assessment
-LIMIT 3`,
-      },
-      {
-        id: "CQ8",
-        title: "What is the human-validated overall integrity assessment for this work?",
-        query: `PREFIX ripe:      <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:      <https://w3id.org/tido#>
-PREFIX prov:      <http://www.w3.org/ns/prov#>
-PREFIX prism:     <http://prismstandard.org/namespaces/basic/3.0/>
-
-SELECT DISTINCT ?assessment ?overallOutcome ?overallRationale WHERE {
-  ?work prism:doi "10.1111/bjdp.12503" .
-  ?assessment ripe:assesses ?work .
-  ?overallQuestion a ripe:OverallIntegrityAssessmentQuestion .
-  ?overall a ripe:IntegrityAssessmentHypothesis ;
-           tido:answers ?overallQuestion ;
-           ripe:resultOutcome ?overallOutcome ;
-           prov:wasMemberOf ?assessment ;
-           prov:wasAttributedTo ?reviewer .
-  ?reviewer a ripe:HumanReviewer .
-  OPTIONAL { ?overall ripe:rationale ?overallRationale }
-}
-ORDER BY ?assessment
-LIMIT 3`,
-      },
-      {
-        id: "CQ9",
-        title: "Which authors are associated with works where integrity assessment identified concerns?",
-        query: `PREFIX ripe:      <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:      <https://w3id.org/tido#>
-PREFIX prov:      <http://www.w3.org/ns/prov#>
-PREFIX dcterms:   <http://purl.org/dc/terms/>
-PREFIX foaf:      <http://xmlns.com/foaf/0.1/>
-
-SELECT DISTINCT ?authorName (COUNT(DISTINCT ?work) AS ?publicationCount) WHERE {
-  ?overallQuestion a ripe:OverallIntegrityAssessmentQuestion .
-  ?overall a ripe:IntegrityAssessmentHypothesis ;
-           tido:answers ?overallQuestion ;
-           ripe:resultOutcome ?outcome ;
-           prov:wasAttributedTo ?reviewer ;
-           prov:wasMemberOf ?assessment .
-  VALUES ?outcome { "some-concerns" "serious-concerns" }
-  ?reviewer a ripe:HumanReviewer .
-  ?assessment ripe:assesses ?work .
-  ?work dcterms:creator ?author .
-  ?author foaf:name ?authorName .
-}
-GROUP BY ?authorName
-ORDER BY DESC(?publicationCount) ?authorName
-LIMIT 3`,
-      },
-      {
-        id: "CQ10",
-        title: "Which works were assessed by this reviewer?",
+        name: "Co-Author Pairs",
         query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
-PREFIX tido:     <https://w3id.org/tido#>
-PREFIX prov:     <http://www.w3.org/ns/prov#>
-PREFIX prism:    <http://prismstandard.org/namespaces/basic/3.0/>
-PREFIX dcterms:  <http://purl.org/dc/terms/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
 
-SELECT DISTINCT ?assessment ?doi ?title WHERE {
-  <https://w3id.org/ripe/ripe-kg/human-reviewer/RV014> a ripe:HumanReviewer .
+SELECT ?authorNameA ?authorNameB (COUNT(DISTINCT ?work) AS ?sharedWorks)
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work dcterms:creator ?authorA, ?authorB .
+  ?authorA foaf:name ?authorNameA .
+  ?authorB foaf:name ?authorNameB .
+  FILTER(STR(?authorA) < STR(?authorB))
+}
+GROUP BY ?authorNameA ?authorNameB
+ORDER BY DESC(?sharedWorks) ?authorNameA ?authorNameB
+LIMIT 10`,
+      },
+    ],
+  },
+  {
+    label: "Reviewers",
+    queries: [
+      {
+        name: "Reviewer Workload",
+        query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
+PREFIX tido:    <https://w3id.org/tido#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dbo:     <http://dbpedia.org/ontology/>
+
+SELECT ?reviewer ?reviewerId ?role (COUNT(DISTINCT ?assessment) AS ?assessments)
+WHERE {
+  ?reviewer a ripe:HumanReviewer .
+  OPTIONAL { ?reviewer dcterms:identifier ?reviewerId }
+  OPTIONAL { ?reviewer dbo:occupation ?role }
   ?evaluation a tido:Evaluation ;
-              prov:wasAssociatedWith <https://w3id.org/ripe/ripe-kg/human-reviewer/RV014> ;
+              prov:wasAssociatedWith ?reviewer ;
               tido:contributesTo ?assessment .
-  ?assessment ripe:assesses ?work .
-  OPTIONAL { ?work prism:doi ?doi }
+  ?assessment a ripe:ResearchIntegrityAssessment .
+}
+GROUP BY ?reviewer ?reviewerId ?role
+ORDER BY DESC(?assessments) ?reviewerId
+LIMIT 10`,
+      },
+      {
+        name: "Works Reviewed by Reviewer",
+        query: `PREFIX ripe:     <https://w3id.org/ripe/ripe-o#>
+PREFIX tido:    <https://w3id.org/tido#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX prism:   <http://prismstandard.org/namespaces/basic/3.0/>
+
+SELECT ?assessment ?doi ?title
+WHERE {
+  VALUES ?reviewerId { "RV001" }
+  ?reviewer a ripe:HumanReviewer ;
+            dcterms:identifier ?reviewerId .
+  ?evaluation a tido:Evaluation ;
+              prov:wasAssociatedWith ?reviewer ;
+              tido:contributesTo ?assessment .
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi .
   OPTIONAL { ?work dcterms:title ?title }
 }
 ORDER BY ?doi ?assessment
-LIMIT 3
-`,
+LIMIT 10`,
       },
-];
+    ],
+  },
+  {
+    label: "SemOpenAlex",
+    queries: [
+      {
+        name: "Linked Works",
+        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
+PREFIX owl:    <http://www.w3.org/2002/07/owl#>
+PREFIX prism:  <http://prismstandard.org/namespaces/basic/3.0/>
+PREFIX dcterms:<http://purl.org/dc/terms/>
 
-export const DEFAULT_QUERY = COMPETENCY_QUESTIONS[0]?.query ?? "";
+SELECT ?assessment ?doi ?title ?semOpenAlexWork
+WHERE {
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi ;
+        owl:sameAs ?semOpenAlexWork .
+  FILTER(STRSTARTS(STR(?semOpenAlexWork), "https://semopenalex.org/"))
+  OPTIONAL { ?work dcterms:title ?title }
+}
+ORDER BY ?doi ?assessment
+LIMIT 10`,
+      },
+      {
+        name: "Federated Work Concepts",
+        query: `PREFIX ripe:   <https://w3id.org/ripe/ripe-o#>
+PREFIX owl:    <http://www.w3.org/2002/07/owl#>
+PREFIX prism:  <http://prismstandard.org/namespaces/basic/3.0/>
+PREFIX soa:    <https://semopenalex.org/ontology/>
+PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?assessment ?doi ?semOpenAlexWork ?concept ?conceptLabel
+WHERE {
+  SERVICE <https://semopenalex.org/sparql> {
+    BIND(<https://semopenalex.org/concept/C168563851> AS ?concept)
+    ?semOpenAlexWork soa:hasConcept ?concept .
+    ?concept skos:prefLabel ?conceptLabel .
+  }
+
+  ?assessment a ripe:ResearchIntegrityAssessment ;
+              ripe:assesses ?work .
+  ?work prism:doi ?doi ;
+        owl:sameAs ?semOpenAlexWork .
+  FILTER(STRSTARTS(STR(?semOpenAlexWork), "https://semopenalex.org/"))
+}
+ORDER BY ?doi ?assessment
+LIMIT 10`,
+      },
+    ],
+  },
+];
