@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { negotiate } from "@/lib/content-negotiation";
 
 const RIPE_O_PAGES_BASE = "https://ripe-observatory.github.io/RIPE-O/release";
 const LATEST_VERSION = "1.0.0";
@@ -13,12 +14,6 @@ const REPRESENTATIONS = {
 } as const;
 
 type ResponseFormat = keyof typeof REPRESENTATIONS;
-
-interface WeightedMediaType {
-  mediaType: string;
-  order: number;
-  q: number;
-}
 
 export function redirectToRipeOntology(request: NextRequest, version = LATEST_VERSION): Response {
   if (!SUPPORTED_VERSIONS.has(version)) {
@@ -47,40 +42,6 @@ export function redirectToRipeOntology(request: NextRequest, version = LATEST_VE
       Link: linkHeader(version),
     },
   });
-}
-
-function negotiate(acceptHeader: string | null): ResponseFormat | null {
-  if (!acceptHeader?.trim()) {
-    return "text/html";
-  }
-
-  const accepted = acceptHeader
-    .split(",")
-    .map(parseMediaType)
-    .filter((item) => item.q > 0)
-    .sort((left, right) => right.q - left.q || left.order - right.order);
-
-  for (const item of accepted) {
-    if (item.mediaType === "application/xhtml+xml") return "text/html";
-    if (item.mediaType in REPRESENTATIONS) return item.mediaType as ResponseFormat;
-    if (item.mediaType === "text/*") return "text/turtle";
-    if (item.mediaType === "application/*") return "application/ld+json";
-    if (item.mediaType === "*/*") return "text/html";
-  }
-
-  return null;
-}
-
-function parseMediaType(part: string, order: number): WeightedMediaType {
-  const [rawMediaType, ...params] = part.trim().split(";").map((item) => item.trim());
-  const qParam = params.find((param) => param.toLowerCase().startsWith("q="));
-  const q = qParam ? Number(qParam.slice(2)) : 1;
-
-  return {
-    mediaType: rawMediaType.toLowerCase(),
-    order,
-    q: Number.isFinite(q) ? q : 1,
-  };
 }
 
 function targetUrl(version: string, format: ResponseFormat): string {

@@ -3,26 +3,16 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { localHrefForIri, RIPE_KG_BASE, RIPE_ONTOLOGY_BASE } from "./iri";
 
-const GRAPHDB_URL =
-  process.env.SPARQL_ENDPOINT ||
-  "http://localhost:7200/repositories/ripe";
+import { endpointForVersion, defaultVersion } from "./version-endpoints";
+import { isKgVersion, PATH_HEADER, VERSION_HEADER, versionedHref, type KgVersion } from "./versions";
+import { negotiate, RDF_FORMATS as FORMATS, type RdfFormat } from "./content-negotiation";
 
+const RDF_FORMATS = Object.keys(FORMATS) as RdfFormat[];
 const QUERY_TIMEOUT_MS = 30000;
 
-const RDF_FORMATS = [
-  "text/turtle",
-  "application/ld+json",
-  "application/rdf+xml",
-  "application/n-triples",
-] as const;
-
-type RdfFormat = (typeof RDF_FORMATS)[number];
-type ResponseFormat = RdfFormat | "text/html";
-
-interface WeightedMediaType {
-  mediaType: string;
-  q: number;
-  order: number;
+function selectedVersion(request: NextRequest): KgVersion {
+  const value = request.headers.get(VERSION_HEADER);
+  return value && isKgVersion(value) ? value : defaultVersion();
 }
 
 interface TripleRow {
@@ -60,18 +50,15 @@ export async function resolveResource(request: NextRequest, uri: string): Promis
     });
   }
 
-  const exists = await resourceExists(uri);
+  if (format === "text/html") {
+    const rows = await fetchResourceTriples(uri, selectedVersion(request));
+    return new Response(renderHtml(request, uri, rows), {
+      status: rows.length ? 200 : 404,
+      headers: { "Content-Type": "text/html; charset=utf-8", Link: linkHeader(request), Vary: "Accept" },
+    });
+  }
+  const exists = await resourceExists(uri, selectedVersion(request));
   if (!exists) {
-    if (format === "text/html") {
-      return new Response(renderHtml(request, uri, []), {
-        status: 404,
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          Link: linkHeader(request),
-          Vary: "Accept",
-        },
-      });
-    }
     return new Response("Resource not found", {
       status: 404,
       headers: {
@@ -82,36 +69,7 @@ export async function resolveResource(request: NextRequest, uri: string): Promis
     });
   }
 
-  return format === "text/html"
-    ? htmlResourceResponse(request, uri)
-    : rdfResourceResponse(request, uri, format);
-}
-
-function negotiate(acceptHeader: string | null): ResponseFormat | null {
-  if (!acceptHeader || acceptHeader.trim() === "") {
-    return "text/html";
-  }
-
-  const accepted = acceptHeader
-    .split(",")
-    .map((part, order): WeightedMediaType => {
-      const [rawMediaType, ...params] = part.trim().split(";").map((item) => item.trim());
-      const qParam = params.find((param) => param.startsWith("q="));
-      const q = qParam ? Number(qParam.slice(2)) : 1;
-      return { mediaType: rawMediaType.toLowerCase(), q: Number.isFinite(q) ? q : 1, order };
-    })
-    .filter((item) => item.q > 0)
-    .sort((left, right) => right.q - left.q || left.order - right.order);
-
-  for (const item of accepted) {
-    if (item.mediaType === "text/html" || item.mediaType === "application/xhtml+xml") {
-      return "text/html";
-    }
-    const rdfFormat = RDF_FORMATS.find((candidate) => candidate === item.mediaType);
-    if (rdfFormat) return rdfFormat;
-    if (item.mediaType === "*/*") return "text/html";
-  }
-  return null;
+  return rdfResourceResponse(request, uri, format);
 }
 
 async function rdfResourceResponse(
@@ -119,8 +77,11 @@ async function rdfResourceResponse(
   uri: string,
   format: RdfFormat
 ): Promise<Response> {
-  const body = `DESCRIBE <${uri}>`;
-  const response = await sparqlRequest(body, format);
+  // Match the HTML description, including resources used only as objects.
+  const body = `CONSTRUCT { <${uri}> ?p ?o . ?s ?incoming <${uri}> }
+WHERE { { <${uri}> ?p ?o } UNION { ?s ?incoming <${uri}> } }`;
+  const response = await sparqlRequest(body, format, selectedVersion(request));
+  if (!response.ok) throw new Error("Resource query failed");
   const text = await response.text();
   return new Response(text, {
     status: response.status,
@@ -132,18 +93,7 @@ async function rdfResourceResponse(
   });
 }
 
-async function htmlResourceResponse(request: NextRequest, uri: string): Promise<Response> {
-  const rows = await fetchResourceTriples(uri);
-  return new Response(renderHtml(request, uri, rows), {
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      Link: linkHeader(request),
-      Vary: "Accept",
-    },
-  });
-}
-
-async function resourceExists(uri: string): Promise<boolean> {
+async function resourceExists(uri: string, version: KgVersion): Promise<boolean> {
   const query = `
 ASK {
   { <${uri}> ?predicate ?object }
@@ -151,7 +101,7 @@ ASK {
   { ?subject ?predicate <${uri}> }
 }`;
 
-  const response = await sparqlRequest(query, "application/sparql-results+json");
+  const response = await sparqlRequest(query, "application/sparql-results+json", version);
   if (!response.ok) {
     throw new Error(`SPARQL query failed: ${response.status} ${response.statusText}`);
   }
@@ -159,7 +109,7 @@ ASK {
   return data.boolean === true;
 }
 
-async function fetchResourceTriples(uri: string): Promise<TripleRow[]> {
+async function fetchResourceTriples(uri: string, version: KgVersion): Promise<TripleRow[]> {
   const query = `
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -188,7 +138,7 @@ WHERE {
 ORDER BY ?subject ?predicate ?object
 LIMIT 500`;
 
-  const response = await sparqlRequest(query, "application/sparql-results+json");
+  const response = await sparqlRequest(query, "application/sparql-results+json", version);
   if (!response.ok) {
     throw new Error(`SPARQL query failed: ${response.status} ${response.statusText}`);
   }
@@ -203,22 +153,17 @@ LIMIT 500`;
   }));
 }
 
-async function sparqlRequest(query: string, accept: string): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), QUERY_TIMEOUT_MS);
-  try {
-    return await fetch(GRAPHDB_URL, {
+async function sparqlRequest(query: string, accept: string, version: KgVersion): Promise<Response> {
+  return fetch(endpointForVersion(version), {
       method: "POST",
       headers: {
         "Content-Type": "application/sparql-query",
         Accept: accept,
       },
       body: query,
-      signal: controller.signal,
+      signal: AbortSignal.timeout(QUERY_TIMEOUT_MS),
+      cache: "no-store",
     });
-  } finally {
-    clearTimeout(timeoutId);
-  }
 }
 
 function linkHeader(request: NextRequest): string {
@@ -228,26 +173,33 @@ function linkHeader(request: NextRequest): string {
     .join(", ");
 }
 
+function resourcePath(request: NextRequest): string {
+  const path = new URL(request.headers.get(PATH_HEADER) || request.nextUrl.pathname, request.nextUrl.origin);
+  path.searchParams.delete("version");
+  return versionedHref(path.pathname + path.search, selectedVersion(request));
+}
+
 function currentResourceUrl(request: NextRequest): string {
   const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
   const host = forwardedHost || request.headers.get("host") || request.nextUrl.host;
   const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
   const proto = forwardedProto || request.nextUrl.protocol.replace(":", "") || "http";
-  return `${proto}://${host}${request.nextUrl.pathname}`;
+  return `${proto}://${host}${resourcePath(request)}`;
 }
 
 function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): string {
+  const version = selectedVersion(request);
   const title = compactUri(uri);
   const downloadLinks = RDF_FORMATS.map((format) => {
-    const href = request.nextUrl.pathname;
+    const href = resourcePath(request);
     return `<a href="${escapeHtml(href)}" data-format="${format}">${format}</a>`;
   }).join("");
 
   const rowHtml = rows.map((row) => `
     <tr>
-      <td>${renderTerm(row.subject, row.subjectLabel)}</td>
-      <td><code>${linkify(row.predicate)}</code></td>
-      <td>${renderObject(row)}</td>
+      <td>${renderTerm(row.subject, row.subjectLabel, version)}</td>
+      <td><code>${linkify(row.predicate, version)}</code></td>
+      <td>${renderObject(row, version)}</td>
     </tr>
   `).join("");
 
@@ -315,16 +267,16 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
 <body>
   <header class="site-header">
     <div class="site-nav">
-      <a class="brand" href="/explore">RIPE <span>Knowledge Graph</span></a>
+      <a class="brand" href="${versionedHref("/explore", version)}">RIPE <span>Knowledge Graph</span></a>
       <nav class="nav-links" aria-label="Primary navigation">
-        <a href="/explore">Explore</a>
-        <a href="/sparql">SPARQL</a>
-        <a href="/ontology">Ontology</a>
+        <a href="${versionedHref("/explore", version)}">Explore</a>
+        <a href="${versionedHref("/sparql", version)}">SPARQL</a>
+        <a href="${versionedHref("/ontology", version)}">Ontology</a>
       </nav>
     </div>
   </header>
   <main>
-    <div class="eyebrow">RIPE Resource</div>
+    <div class="eyebrow">RIPE-KG ${version} · Resource</div>
     <h1>${escapeHtml(title)}</h1>
     <code class="iri">${escapeHtml(uri)}</code>
     <nav class="formats" aria-label="RDF serializations">${downloadLinks}</nav>
@@ -342,7 +294,8 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
       link.addEventListener("click", async (event) => {
         event.preventDefault();
         const response = await fetch(link.href, { headers: { Accept: link.dataset.format } });
-        const text = await response.text();
+        if (!response.ok) throw new Error("Resource query failed");
+  const text = await response.text();
         const blob = new Blob([text], { type: link.dataset.format });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -357,20 +310,20 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
 </html>`;
 }
 
-function renderObject(row: TripleRow): string {
+function renderObject(row: TripleRow, version: KgVersion): string {
   if (row.objectType === "uri") {
-    return renderTerm(row.object, row.objectLabel);
+    return renderTerm(row.object, row.objectLabel, version);
   }
   return `<span>${escapeHtml(row.object)}</span>`;
 }
 
-function renderTerm(uri: string, label: string): string {
+function renderTerm(uri: string, label: string, version: KgVersion): string {
   const labelHtml = label ? `<span class="label">${escapeHtml(label)}</span>` : "";
-  return `<code>${linkify(uri)}</code>${labelHtml}`;
+  return `<code>${linkify(uri, version)}</code>${labelHtml}`;
 }
 
-function linkify(uri: string): string {
-  const href = localHrefForIri(uri);
+function linkify(uri: string, version: KgVersion): string {
+  const href = versionedHref(localHrefForIri(uri), version);
   const label = escapeHtml(compactUri(uri));
   if (href.startsWith("/")) {
     return `<a href="${escapeHtml(href)}">${label}</a>`;
