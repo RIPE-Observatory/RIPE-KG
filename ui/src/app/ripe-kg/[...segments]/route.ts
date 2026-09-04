@@ -6,5 +6,17 @@ export async function GET(
   context: { params: Promise<{ segments: string[] }> }
 ) {
   const { segments } = await context.params;
-  return resolveResource(request, resourceUriFromSegments(segments));
+  try {
+    const response = await resolveResource(request, resourceUriFromSegments(segments));
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Access-Control-Expose-Headers", "X-RIPE-KG-Version");
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  } catch (error) {
+    const timeout = error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name);
+    return new Response(timeout ? "Resource query timed out" : "Selected release is unavailable", {
+      status: timeout ? 504 : 503,
+      headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
+    });
+  }
 }
