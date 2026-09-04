@@ -4,7 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-export function Providers({ children }: { children: ReactNode }) {
+import { VersionContext } from "./version-link";
+import type { KgVersion } from "@/lib/versions";
+
+export function Providers({ children, version }: { children: ReactNode; version: KgVersion }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -17,5 +20,5 @@ export function Providers({ children }: { children: ReactNode }) {
       })
   );
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return <VersionContext.Provider value={version}><QueryClientProvider client={queryClient}>{children}</QueryClientProvider></VersionContext.Provider>;
 }
