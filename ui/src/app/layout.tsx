@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { requestVersion } from "@/lib/request-version";
 import { Navigation } from "@/components/navigation";
 
 const sourceSans = Source_Sans_3({
@@ -44,15 +45,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const version = await requestVersion();
   return (
     <html lang="en" className="light" suppressHydrationWarning>
       <body className={`${sourceSans.variable} ${libreBaskerville.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <Providers>
+        <Providers key={version} version={version}>
           <div className="min-h-screen flex flex-col">
             <Navigation />
             <main className="flex-1">{children}</main>

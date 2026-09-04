@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link, { useKgVersion } from "@/components/version-link";
+import { RELEASES, releasePath, stripReleasePath } from "@/lib/versions";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -12,18 +13,32 @@ const navItems = [
 ];
 
 export function Navigation() {
-  const pathname = usePathname();
+  const pathname = stripReleasePath(usePathname());
+  const version = useKgVersion();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background border-b-0">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        {/* Logo — expands on load, collapses after 5s via CSS animation */}
-        <Link href="/" className="font-libre text-lg">
-          <span className="text-stone-900">RIPE</span>{" "}
-          <span className="text-amber-700">Knowledge Graph</span>
+        <Link href="/" className="flex items-center gap-2 font-libre text-base sm:text-lg">
+          <img src="/brand/ripe-kg.svg" alt="" width={32} height={32} className="size-7 shrink-0 sm:size-8" />
+          <span>
+            <span className="text-stone-900">RIPE</span>{" "}
+            <span className="text-amber-700">Knowledge Graph</span>
+          </span>
         </Link>
 
+        <label className="text-sm text-stone-600 flex items-center gap-2">
+          <span className="hidden sm:inline">Release</span>
+          <select aria-label="KG release" value={version} className="bg-transparent border border-stone-300 rounded px-2 py-1"
+            onChange={(event) => {
+              const selected = event.target.value as keyof typeof RELEASES;
+              // A full navigation also clears pending workbench results and client caches.
+              window.location.assign(releasePath(selected, pathname === "/" ? "/explore" : pathname));
+            }}>
+            {Object.keys(RELEASES).map((v) => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-8">
           {navItems.map((item) => {

@@ -4,19 +4,22 @@ import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/version-link";
 import {
   searchPublications,
   searchAuthors,
   type PublicationSearchResult,
   type AuthorSearchResult,
 } from "@/lib/sparql-kg";
+import { useKgVersion } from "./version-link";
+import { versionedHref } from "@/lib/versions";
 import { queryKeys } from "@/lib/query-keys";
 import { cleanDisplayText } from "@/components/shared";
 
 type SearchMode = "publications" | "authors";
 
 export function SearchPanel() {
+  const version = useKgVersion();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -36,9 +39,9 @@ export function SearchPanel() {
       if (q) params.set("q", q);
       if (mode !== "publications") params.set("mode", mode);
       const qs = params.toString();
-      router.replace(qs ? `/explore?${qs}` : "/explore", { scroll: false });
+      router.replace(versionedHref(qs ? `/explore?${qs}` : "/explore", version), { scroll: false });
     },
-    [router]
+    [router, version]
   );
 
   const handleSearchChange = (value: string) => {
@@ -52,14 +55,14 @@ export function SearchPanel() {
   };
 
   const pubQuery = useQuery({
-    queryKey: queryKeys.publications.search(debouncedTerm),
-    queryFn: () => searchPublications(debouncedTerm),
+    queryKey: [version, ...queryKeys.publications.search(debouncedTerm)],
+    queryFn: () => searchPublications(debouncedTerm, 20, version),
     enabled: debouncedTerm.length >= 2 && searchMode === "publications",
   });
 
   const authorQuery = useQuery({
-    queryKey: queryKeys.authors.search(debouncedTerm),
-    queryFn: () => searchAuthors(debouncedTerm),
+    queryKey: [version, ...queryKeys.authors.search(debouncedTerm)],
+    queryFn: () => searchAuthors(debouncedTerm, 20, version),
     enabled: debouncedTerm.length >= 2 && searchMode === "authors",
   });
 
