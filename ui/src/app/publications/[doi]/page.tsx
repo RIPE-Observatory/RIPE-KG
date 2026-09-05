@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/version-link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";

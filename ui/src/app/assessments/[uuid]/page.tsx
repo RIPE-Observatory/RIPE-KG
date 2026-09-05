@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/version-link";
 import type { Metadata } from "next";
 import {
   fetchAssessmentHeader,
