@@ -1,15 +1,19 @@
 "use client";
 
+import Link, { useKgVersion } from "@/components/version-link";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useMutation } from "@tanstack/react-query";
-import { COMPETENCY_QUESTIONS, DEFAULT_QUERY, executeSparqlQuery, type SparqlResults, type SparqlBinding } from "@/lib/sparql";
+import { executeSparqlQuery, QUERY_GROUPS, type SparqlResults, type SparqlBinding } from "@/lib/sparql";
 import { RIPE_KG_BASE, RIPE_ONTOLOGY_BASE, isLocalHref, localHrefForIri } from "@/lib/iri";
 import { cleanDisplayText } from "@/components/shared";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
+const MonacoEditor = dynamic(() => import("@/components/query-editor"), { ssr: false });
+
+const DEFAULT_QUERY = QUERY_GROUPS[0]?.queries[0]?.query ?? "";
 
 export default function SparqlPage() {
+  const version = useKgVersion();
   const [query, setQuery] = useState(DEFAULT_QUERY);
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
   const [resultsView, setResultsView] = useState<"table" | "json">("table");
@@ -20,8 +24,9 @@ export default function SparqlPage() {
     isPending,
     error,
   } = useMutation({
-    mutationFn: (sparqlQuery: string) => executeSparqlQuery(sparqlQuery),
+    mutationFn: (sparqlQuery: string) => executeSparqlQuery(sparqlQuery, version),
   });
+  const limitReached = results?.metadata?.limitReached === true;
 
   const handleRunQuery = () => runQuery(query);
 
@@ -35,8 +40,8 @@ export default function SparqlPage() {
   };
 
   const handleDownloadCsv = () => {
-    if (!results?.results?.bindings?.length) return;
-    const headers = results.head.vars;
+    if (!results?.results?.bindings?.length || limitReached) return;
+    const headers = results.head.vars ?? [];
     const rows = results.results.bindings.map((binding) =>
       headers.map((h) => `"${(binding[h]?.value || "").replace(/"/g, '""')}"`).join(",")
     );
@@ -51,36 +56,42 @@ export default function SparqlPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-57px)] flex overflow-hidden">
-      <aside className="w-[260px] shrink-0 border-r border-stone-200 bg-stone-50/50 flex flex-col overflow-hidden">
+    <div className="flex flex-col md:flex-row md:h-[calc(100vh-64px)] overflow-hidden">
+      <aside className="w-full md:w-65 max-h-52 md:max-h-none shrink-0 border-r border-stone-200 bg-stone-50/50 flex flex-col overflow-hidden">
         <div className="px-5 py-4 border-b border-stone-200">
           <h2 className="font-source text-sm font-semibold text-stone-700 uppercase tracking-wider">
-            Competency questions
+            Sample Queries
           </h2>
           <p className="font-source text-sm text-stone-500 mt-0.5">Click to load into editor</p>
         </div>
-        <nav className="flex-1 overflow-y-auto py-2" aria-label="Competency question queries">
-          {COMPETENCY_QUESTIONS.map((q) => {
-            const label = `${q.id}: ${q.title}`;
-            return (
-              <button
-                type="button"
-                key={q.id}
-                onClick={() => handleSelectQuery(label, q.query)}
-                className={`w-full text-left px-5 py-1.5 font-source text-sm leading-snug transition-colors ${
-                  activeQuery === label
-                    ? "text-amber-900 bg-amber-50 font-medium border-l-2 border-amber-600"
-                    : "text-stone-700 hover:bg-stone-100 hover:text-stone-900 border-l-2 border-transparent"
-                }`}
-              >
-                <span className="font-semibold">{q.id}</span>: {q.title}
-              </button>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto py-2" aria-label="Sample queries">
+          {QUERY_GROUPS.map((group) => (
+            <div key={group.label} className="mb-1">
+              <div className="px-5 pt-3 pb-1">
+                <span className="font-source text-sm font-semibold text-stone-500 uppercase tracking-widest">
+                  {group.label}
+                </span>
+              </div>
+              {group.queries.map((q) => (
+                <button
+                  type="button"
+                  key={q.name}
+                  onClick={() => handleSelectQuery(q.name, q.query)}
+                  className={`w-full text-left px-5 py-1.5 font-source text-sm leading-snug transition-colors ${
+                    activeQuery === q.name
+                      ? "text-amber-900 bg-amber-50 font-medium border-l-2 border-amber-600"
+                      : "text-stone-700 hover:bg-stone-100 hover:text-stone-900 border-l-2 border-transparent"
+                  }`}
+                >
+                  {q.name}
+                </button>
+              ))}
+            </div>
+          ))}
         </nav>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <section className="min-w-0 flex-1 flex flex-col overflow-hidden">
         {/* Header bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-white">
           <div>
@@ -100,7 +111,7 @@ export default function SparqlPage() {
         </div>
 
         {/* Editor + Results panels */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 grid-rows-[360px_360px] md:grid-rows-2 lg:grid-cols-2 lg:grid-rows-1 overflow-hidden">
           {/* Editor panel */}
           <div className="flex flex-col border-r border-stone-200 overflow-hidden">
             <div className="px-5 py-2.5 border-b border-stone-200 bg-stone-50 flex items-center justify-between">
@@ -198,8 +209,9 @@ export default function SparqlPage() {
                 <button
                   type="button"
                   onClick={handleDownloadCsv}
-                  className="p-1.5 text-stone-500 hover:text-stone-700 transition-colors"
-                  title="Download CSV"
+                  disabled={limitReached}
+                  className="p-1.5 text-stone-500 hover:text-stone-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  title={limitReached ? "Narrow the query before exporting a complete CSV" : "Download CSV"}
                   aria-label="Download CSV"
                 >
                   <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,6 +223,13 @@ export default function SparqlPage() {
 
             {/* Results content */}
             <div className="flex-1 overflow-auto min-h-0">
+              {limitReached && (
+                <p role="alert" className="m-4 border border-amber-500 bg-amber-50 p-3 text-sm text-amber-950">
+                  Result limit reached ({results.metadata!.rowLimit.toLocaleString()} rows).
+                  Results may be incomplete. Narrow your query or request a smaller
+                  page before exporting CSV. Copied JSON includes this limit information.
+                </p>
+              )}
               {error ? (
                 <div className="p-5">
                   <p className="font-source text-sm font-semibold text-red-800 uppercase tracking-wider mb-2">Error</p>
@@ -232,14 +251,17 @@ export default function SparqlPage() {
             </div>
           </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
 
 function ResultsTable({ results }: { results: SparqlResults }) {
-  const headers = results.head.vars;
-  const bindings = results.results.bindings;
+  if (typeof results.boolean === "boolean") {
+    return <p className="p-5 font-mono text-lg" role="status">{String(results.boolean)}</p>;
+  }
+  const headers = results.head.vars ?? [];
+  const bindings = results.results?.bindings ?? [];
 
   return (
     <div className="overflow-x-auto">
@@ -330,7 +352,7 @@ function UriResultLink({ uri }: { uri: string }) {
   const href = localHrefForIri(uri);
   const local = isLocalHref(href);
   return (
-    <a
+    <Link
       href={href}
       target={local ? undefined : "_blank"}
       rel={local ? undefined : "noopener noreferrer"}
@@ -338,6 +360,6 @@ function UriResultLink({ uri }: { uri: string }) {
       title={uri}
     >
       {shortenUri(uri)}
-    </a>
+    </Link>
   );
 }

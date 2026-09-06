@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "@/components/version-link";
+
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 
@@ -51,10 +53,9 @@ const LEGEND_ITEMS = [
 
 const PAGE_GRID_CLASSES = [
   "grid min-h-0 flex-1 overflow-hidden",
-  "grid-cols-[260px_minmax(640px,1fr)_400px]",
-  "max-xl:grid-cols-[240px_minmax(0,1fr)_360px]",
-  "max-lg:grid-cols-[220px_minmax(0,1fr)]",
-  "max-lg:[&>aside:last-child]:hidden",
+  "grid-cols-1 grid-rows-[20rem_24rem_auto]",
+  "lg:grid-cols-[240px_minmax(0,1fr)_360px] lg:grid-rows-1",
+  "xl:grid-cols-[260px_minmax(0,1fr)_400px]",
 ].join(" ");
 
 export default function OntologyPage() {
@@ -81,7 +82,7 @@ export default function OntologyPage() {
   }, [lookup.byIri]);
 
   return (
-    <main className="flex h-[calc(100vh-57px)] flex-col overflow-hidden bg-[#f7f4ec]">
+    <section className="flex lg:h-[calc(100vh-64px)] flex-col overflow-hidden bg-[#f7f4ec]">
       <header className="shrink-0 border-b border-stone-300 bg-[#fffdf8] px-5 py-3">
         <h1 className="font-libre text-xl text-stone-950">RIPE Ontology Explorer</h1>
         <p className="font-source text-sm text-stone-600">
@@ -96,7 +97,7 @@ export default function OntologyPage() {
         <RelationshipPanel onSelect={selectWithHash} selected={selected} />
         <DetailsPanel onSelect={selectWithHash} selected={selected} selection={selection} />
       </div>
-    </main>
+    </section>
   );
 }
 
@@ -553,14 +554,14 @@ function ExternalIri({ href, label }: { href: string; label: string }) {
   const localHref = localHrefForIri(href);
   const isLocal = isLocalHref(localHref);
   return (
-    <a
+    <Link
       className="break-all font-mono text-xs text-amber-800 underline decoration-amber-400 underline-offset-4"
       href={localHref}
       rel={isLocal ? undefined : "noreferrer"}
       target={isLocal ? undefined : "_blank"}
     >
       {label}
-    </a>
+    </Link>
   );
 }
 
