@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>RIPE Knowledge Graph</title>
+  <rect width="64" height="64" rx="8" fill="#fafaf9" />
+  <g stroke="#1c1917" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m25 39-8 8" stroke-width="4" />
+    <path d="M17 47 7 57" stroke-width="4" />
+    <circle cx="39" cy="25" r="20" stroke-width="4" />
+  </g>
+  <defs>
+    <mask id="graph-open-nodes">
+      <rect width="64" height="64" fill="white" />
+      <g fill="black">
+        <circle cx="39" cy="25" r="4" />
+        <circle cx="31" cy="17" r="2.8" />
+        <circle cx="47" cy="17" r="2" />
+        <circle cx="30" cy="33" r="3" />
+        <circle cx="47" cy="33" r="2.4" />
+      </g>
+    </mask>
+  </defs>
+  <g transform="translate(39 25) scale(0.82) translate(-39 -25)" stroke="#b45309" stroke-width="1.7" stroke-linecap="round">
+    <path mask="url(#graph-open-nodes)" d="m31 17 8 8 8-8M30 33l9-8 8 8" />
+    <circle cx="39" cy="25" r="4" />
+    <circle cx="31" cy="17" r="2.8" />
+    <circle cx="47" cy="17" r="2" />
+    <circle cx="30" cy="33" r="3" />
+    <circle cx="47" cy="33" r="2.4" />
+  </g>
+</svg>
