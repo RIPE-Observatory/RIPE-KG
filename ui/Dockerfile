@@ -1,18 +1,19 @@
 # syntax=docker/dockerfile:1
 
-FROM oven/bun:1.3.9 AS deps
+FROM node:24-alpine AS deps
+COPY --from=oven/bun:1.3.9-alpine /usr/local/bin/bun /usr/local/bin/bun
 WORKDIR /repo/ui
 COPY ui/package.json ui/bun.lock ./
 RUN bun install --frozen-lockfile
 
-FROM oven/bun:1.3.9 AS builder
+FROM deps AS builder
 WORKDIR /repo
-COPY --from=deps /repo/ui/node_modules ./ui/node_modules
 COPY ui ./ui
 COPY knowledge/ripe.ttl ./knowledge/ripe.ttl
 WORKDIR /repo/ui
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN bun run build
+RUN test -s public/data/1.0.0/ripe-data.ttl && test -s public/data/1.1.0/ripe-data.ttl
+RUN bun run check && bun run build
 
 FROM node:24-alpine AS runner
 WORKDIR /app
