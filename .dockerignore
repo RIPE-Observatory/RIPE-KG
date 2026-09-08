@@ -21,3 +21,6 @@ paper
 sample-data
 tmp
 assessments/.openalex-cache.json
+
+.build
+private
