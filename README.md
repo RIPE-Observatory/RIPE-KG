@@ -1,153 +1,138 @@
-# RIPE-KG - Research Integrity Provenance and Evidence Knowledge Graph
+# RIPE-KG
+
 [![DOI](https://zenodo.org/badge/1212635420.svg)](https://doi.org/10.5281/zenodo.20690734)
 
-RIPE-KG is a knowledge graph of research integrity assessment traces represented using the Research Integrity Provenance and Evidence Ontology (RIPE-O). It connects works being assessed, integrity questions, evidence, automated outputs, human-reviewed outcomes, reviewers, agents, and provenance activities in RDF.
+The **Research Integrity Provenance and Evidence Knowledge Graph** represents
+research integrity assessments using [RIPE-O](https://w3id.org/ripe/ripe-o).
+It connects assessed publications, integrity questions, evidence, automated
+outputs, human-reviewed outcomes, and the agents and activities that produced
+them.
 
-A user can query which work was assessed, what evidence was considered, how a result was produced, where automated and human-reviewed outcomes differ, and which activity or agent is associated with a trace.
+[Explore the public graph](https://ripe-kg.inspectai.app) ·
+[SPARQL workbench](https://ripe-kg.inspectai.app/sparql) ·
+[Archived release](https://doi.org/10.5281/zenodo.20690734)
 
-The live exploration interface is available at:
+## Data and releases
 
-[https://ripe-kg.inspectai.app](https://ripe-kg.inspectai.app)
+| KG release | Assessments | Assessed publications | Reviewers | Ontology |
+| --- | ---: | ---: | ---: | --- |
+| 1.0.0 | 140 | 95 | 15 | RIPE-O 1.0.0 |
+| 1.1.0 | 185 | 119 | 22 | RIPE-O 1.0.0 |
 
-The repository snapshot is **RIPE-KG 1.1.0**, containing 185 assessments
-reviewed by 22 pseudonymous reviewers.
+The working-tree dataset is 1.1.0. The application supports both snapshots in
+separate, read-only GraphDB repositories. Versioned routes select a snapshot;
+unversioned routes use the configured default. The public deployment is updated
+separately from this repository.
 
-## Repository Contents
+Reviewers use stable pseudonymous identifiers. Private extraction inputs and
+credentials are excluded from the repository.
 
-This repository contains the public RIPE-KG snapshot and the files needed to reproduce, load, and inspect it.
+## Run locally
 
-```text
-assessments/                  Public pseudonymised assessment data and mapping inputs
-graphdb-config/               GraphDB repository configuration
-knowledge/                    RIPE-O ontology and generated RIPE-KG RDF data
-mappings/                     YARRRML mapping and generated RML mapping
-ui/                           Next.js UI and SPARQL interface
-Makefile                      Reproduction, GraphDB, and UI commands
-pyproject.toml                Python project metadata managed with uv
-docker-compose.yml            Local GraphDB service
+Requirements: Git with the repository history, Docker Compose, Python 3.11+
+with [uv](https://docs.astral.sh/uv/), Node.js 24, and Bun 1.3.9. Building RDF from source also
+requires Java 21+. GraphDB 10.8.14 is pinned by image digest in
+[`docker-compose.yml`](docker-compose.yml).
+
+From the repository root:
+
+```sh
+uv sync --locked
+make graphdb-up
+make graphdb-wait
+make load-release RELEASE_VERSION=1.0.0
+make load-release RELEASE_VERSION=1.1.0
+make ui-build
 ```
 
-## Main Files
+Use a full Git clone: historical downloads require the commits in the release
+catalog. Run each load command once per new database volume; the loader verifies
+the snapshot, makes it read-only, and refuses to replace an existing repository.
 
-| File | Description |
+Start the built interface:
+
+```sh
+cd ui
+HOSTNAME=127.0.0.1 GRAPHDB_BASE_URL=http://localhost:7200 bun run start
+```
+
+Open [localhost:3000](http://localhost:3000). For development, use `bun run dev`
+instead of `bun run start`. See [`ui/.env.example`](ui/.env.example) for server
+configuration.
+
+## Query a release
+
+Use `/releases/<version>/explore`, `/sparql`, `/api/sparql`, or `/api/health`
+under the selected release prefix. For example:
+
+```sh
+curl --fail http://localhost:3000/releases/1.1.0/api/sparql \
+  -H 'Content-Type: application/sparql-query' \
+  --data 'PREFIX ripe: <https://w3id.org/ripe/ripe-o#>
+SELECT (COUNT(?assessment) AS ?count)
+WHERE { ?assessment a ripe:ResearchIntegrityAssessment }'
+```
+
+The API accepts read-only `SELECT` and `ASK` queries and returns JSON with an
+`X-RIPE-KG-Version` header. GET with `?query=` and form-encoded POST are also
+supported. Query execution is limited to 30 seconds and SELECT results to
+100,000 rows. Results at that cap carry a completeness warning in the API and
+workbench; CSV export requires a smaller result. Federation is restricted to
+the explicit SemOpenAlex service IRI.
+
+Release roots such as `/releases/1.1.0` support content negotiation for HTML,
+Turtle, JSON-LD, RDF/XML, and N-Triples. Entity identifiers remain stable across
+releases; a versioned description URL selects the snapshot describing an entity.
+
+## Repository layout
+
+| Path | Contents |
 | --- | --- |
-| `assessments/assessments.json` | Public pseudonymised assessment export |
-| `assessments/assessments_enriched.json` | Assessment data enriched with OpenAlex metadata |
-| `assessments/assessments_yarrrml.json` | Mapping-ready JSON generated from the assessment export |
-| `knowledge/ripe.ttl` | RIPE-O ontology used by the graph |
-| `knowledge/ripe-data.ttl` | Generated RIPE-KG RDF data |
-| `mappings/ripe.yarrrml.yml` | YARRRML mapping specification |
-| `mappings/ripe.rml.ttl` | Generated RML mapping |
-| `graphdb-config/repository-config.ttl` | GraphDB repository configuration |
-| `releases/1.1.0/release-manifest.json` | Release inputs, counts, tool versions, and artifact checksums |
-| `releases/1.1.0/SHA256SUMS` | Independently verifiable checksums for the published artifacts |
+| [`assessments/`](assessments/) | Public assessment export, OpenAlex cache, enriched data, and mapping inputs |
+| [`knowledge/`](knowledge/) | RIPE-O ontology and generated RDF dataset |
+| [`mappings/`](mappings/) | YARRRML source and generated RML mapping |
+| [`releases/`](releases/) | Release manifests and artifact checksums |
+| [`graphdb-config/`](graphdb-config/) | Repository configuration |
+| [`scripts/release/`](scripts/release/README.md) | Extraction, enrichment, RDF generation, loading, and validation |
+| [`ui/`](ui/) | Next.js application and tests |
 
-## Requirements
+## Validate and reproduce
 
-| Tool | Purpose |
-| --- | --- |
-| `uv` | Python dependency management, PostgreSQL extraction, and RDF validation |
-| `bun` | YARRRML parsing and UI builds |
-| Java | RMLMapper 8.1.0 execution |
-| Docker | Local PostgreSQL restoration and GraphDB 10.8.5 service |
-
-## Reproduce the RDF Snapshot
-
-To parse the ontology, RML mapping, and generated data:
+Validate the checked-in RDF and release checksums from the repository root:
 
 ```sh
 make reproduce
+sha256sum -c releases/1.1.0/SHA256SUMS
 ```
 
-This checks:
+`make reproduce` parses the ontology, mapping, and dataset. Regenerating a release
+from PostgreSQL requires authorised access to the source snapshot and private
+release inputs; see the [release guide](scripts/release/README.md).
 
-* `knowledge/ripe.ttl`
-* `mappings/ripe.rml.ttl`
-* `knowledge/ripe-data.ttl`
-
-## Build a Release from PostgreSQL
-
-The release scripts and the complete developer guide are in
-[`scripts/release/`](scripts/release/README.md).
+Run the interface checks:
 
 ```sh
-DATABASE_URL="postgresql://user:password@localhost/inspect_ai" make release-local
-```
-
-This builds the candidate under `.build/<version>/` and verifies it in local
-GraphDB. It does not deploy anything.
-
-## Load the Knowledge Graph
-
-Start GraphDB:
-
-```sh
-make graphdb-up
-```
-
-Create the `ripe` repository, load RIPE-O and RIPE-KG, and verify the repository configuration and inference:
-
-```sh
-make graphdb-verify
-```
-
-The local SPARQL endpoint is:
-
-```text
-http://localhost:7200/repositories/ripe
-```
-
-The GraphDB repository uses the `owl2-rl` ruleset with inconsistency checks. `owl:sameAs` links are asserted in RIPE-KG, but sameAs expansion is disabled so queries are not rewritten through external SemOpenAlex identifiers.
-
-## Query the Graph
-
-The live SPARQL interface is available at:
-
-[https://ripe-kg.inspectai.app/sparql](https://ripe-kg.inspectai.app/sparql)
-
-The SPARQL API endpoint for the current release is:
-
-```text
-https://ripe-kg.inspectai.app/api/sparql
-```
-
-Published versions can be queried independently:
-
-```text
-https://ripe-kg.inspectai.app/api/sparql?version=1.0.0
-https://ripe-kg.inspectai.app/api/sparql?version=1.1.0
-```
-
-Send a read-only `SELECT` or `ASK` query as the POST body with content type
-`application/sparql-query`. The response includes an `X-RIPE-KG-Version`
-header.
-
-## Run the UI Locally
-
-Load GraphDB first, then build and run the interface:
-
-```sh
-make ui-build
 cd ui
-SPARQL_ENDPOINT=http://localhost:7200/repositories/ripe bun run dev
+bun run test
+bun run check
 ```
 
-The UI includes publication and author search, assessment pages, the ontology explorer, and a SPARQL workbench with curated example queries, including a federated SemOpenAlex query.
+With both repositories loaded and the interface running, run the service checks
+from the repository root:
 
-## Data Scope
+```sh
+uv run python scripts/release/verify-service.py --base http://localhost:3000
+```
 
-The published assessment data is pseudonymised. Human reviewers are represented by stable reviewer identifiers, and no direct reviewer-identifying fields are included in the public JSON or generated RDF.
+See the [release guide](scripts/release/README.md) for extraction and deployment,
+and [deploy/compose.yml](deploy/compose.yml) for the production stack.
 
-## Related Resources
+## Contributing and license
 
-* [RIPE Observatory](https://w3id.org/ripe)
-* [RIPE-O](https://w3id.org/ripe/ripe-o)
-* [INSPECT-AI](https://w3id.org/ripe/inspect-ai)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and review guidance.
+RIPE-KG is licensed under [CC BY 4.0](LICENSE.md). Bundled third-party components
+retain their own license notices.
 
-## License
-
-This work is licensed under the Creative Commons Attribution 4.0 International License. See [LICENSE.md](LICENSE.md) for details.
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes to the data, mappings, RDF output, or interface.
+Related projects: [RIPE Observatory](https://w3id.org/ripe) ·
+[RIPE-O](https://w3id.org/ripe/ripe-o) ·
+[INSPECT-AI](https://w3id.org/ripe/inspect-ai).

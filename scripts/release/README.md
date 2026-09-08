@@ -1,111 +1,139 @@
-# RIPE-KG release pipeline
+# Release guide
 
-This folder contains the scripts used to build a RIPE-KG release from PostgreSQL.
-The pipeline is local: it reads the database, writes a candidate under `.build/`,
-and can load that candidate into a local GraphDB. It does not deploy anything.
+RIPE-KG releases are built from an INSPECT-AI PostgreSQL snapshot and published
+as pseudonymised JSON and RDF. Extraction, enrichment, and mapping run in an
+isolated staging directory. Loading and deployment are separate steps.
 
-## Files
+## Tools
 
-- `build.py` — reads PostgreSQL, applies the private release rules, assigns stable
-  assessment/reviewer IDs, runs the remaining stages, and validates the result.
-- `enrich_openalex.py` — adds OpenAlex records for DOI values, using the local
-  cache before making requests.
-- `preprocess.py` — converts the public assessment JSON into the flat structures
-  consumed by the YARRRML mapping.
+| Script | Purpose |
+| --- | --- |
+| `build.py` | Extract assessments, apply release policy, assign public IDs, generate RDF, and validate artifacts |
+| `enrich_openalex.py` | Enrich DOI records using the OpenAlex cache and API |
+| `preprocess.py` | Produce the JSON structures consumed by YARRRML |
+| `prepare-downloads.py` | Verify release checksums and produce four RDF download formats |
+| `graphdb_config.py` | Render repository configuration from the shared template |
+| `load-graphdb.py` | Create, validate, and protect a versioned repository |
+| `verify-service.py` | Check a running application against both release snapshots |
 
-The RMLMapper jar is downloaded on first use into `.build/tools/` and verified by
-SHA-256. Generated release files are written to `.build/<version>/`.
-
-## Build the current release
-
-Set `DATABASE_URL` to a PostgreSQL database containing the InspectAI jobs:
-
-```sh
-DATABASE_URL="postgresql://user:password@localhost/inspect_ai" make release-local
-```
-
-`make release-local` performs the full build and then loads and checks the actual
-candidate in local GraphDB. Use `make release` when only the files are needed.
-
-The current defaults are:
-
-```text
-version: 1.1.0
-policy: private/release-policy.json
-reviewer index: private/reviewer-index.json
-output: .build/1.1.0/
-```
-
-Override them when needed:
-
-```sh
-DATABASE_URL="postgresql://..." \
-RELEASE_VERSION=1.2.0 \
-RELEASE_OUTPUT=.build/1.2.0 \
-make release-local
-```
-
-## What the pipeline does
-
-1. Opens a read-only PostgreSQL transaction and selects completed jobs for the
-   InspectAI UI version and date range in the private policy.
-2. Keeps assessments with exactly one accepted human-reviewed `OVERALL` answer.
-3. Applies the private assessment and reviewer exclusions.
-4. Generates stable public assessment IDs and uses the permanent `RV###`
-   reviewer index.
-5. Removes private fields and keeps only result payloads used by the mapping.
-6. Enriches DOI records with OpenAlex, preprocesses the JSON, runs the pinned
-   YARRRML parser, and runs the checksum-verified RMLMapper.
-7. Checks expected counts, privacy, RDF parsing, assessment/reviewer RDF counts,
-   and writes `release-manifest.json` plus `SHA256SUMS` for all staged inputs
-   and artifacts.
-8. With `make release-local`, loads the candidate into local GraphDB and checks
-   repository settings and inference.
-
-A build is assembled in a temporary directory. The final `.build/<version>/`
-candidate and reviewer index are updated only after the file and RDF checks pass;
-`make release-local` then performs the separate GraphDB check.
+The build requires Python 3.11+ with uv, Bun 1.3.9, Java 21+, and read access to
+the source database. RMLMapper 8.1.0 is downloaded to `.build/tools/` and verified
+by SHA-256. The YARRRML parser version is pinned in `build.py`.
 
 ## Private inputs
 
-`private/release-policy.json` contains the release cutoff, supported InspectAI job
-versions, exclusions, approved new reviewer UUIDs, included `RV###` identifiers,
-and expected counts.
+Extraction requires two files that are intentionally excluded from Git:
 
-`private/reviewer-index.json` is the permanent reviewer registry. Never renumber,
-delete, or reuse an existing `RV###` identifier. For a new reviewer, place the
-reviewer's database UUID in `allowed_new_reviewer_source_ids`; the build appends
-the next available `RV###` identifier after successful validation.
+- `private/release-policy.json`: source date range, supported INSPECT-AI version,
+  exclusions, approved new reviewer UUIDs, included reviewer IDs, and expected
+  release counts.
+- `private/reviewer-index.json`: the permanent mapping from database reviewer
+  UUIDs to public `RV###` identifiers.
 
-Both files are ignored by Git because they contain private identities or database
-UUIDs.
+Never renumber, delete, or reuse a public reviewer identifier. To include a new
+reviewer, add their database UUID to `allowed_new_reviewer_source_ids` in the
+policy. The build assigns the next public identifier after validation.
 
-## Adapting the pipeline for InspectAI v2 / RIPE-KG 1.2
+The extractor supports INSPECT-AI v1 records. A policy selecting v2 records is
+rejected; supporting another source schema requires explicit extraction and
+mapping changes.
 
-The current extractor intentionally accepts InspectAI v1 jobs only. It fails if a
-policy enables v2, preventing v2 records from being silently interpreted as v1.
+## Build from PostgreSQL
 
-InspectAI v2 database results still use the common top-level fields `checks`,
-`inspect_sr`, `meta`, and `sections`, and they retain the checks already used by
-RIPE-KG. V2 also adds checks such as baseline extraction/statistics, CONSORT flow,
-and registration consistency, and expands INSPECT-SR from five questions to the
-full 26-question set.
+Set `DATABASE_URL` in the environment, then run from the repository root:
 
-To support v2:
+```sh
+make release
+```
 
-1. Add a small v2 normalisation branch in `build.py`. It should convert a v2 job
-   into the same public assessment structure used by the rest of the pipeline.
-2. Decide which new v2 checks/questions RIPE-KG will publish. Update
-   `KEEP_CHECKS` and `KEEP_QUESTIONS` in `build.py` accordingly.
-3. Extend `preprocess.py` and `mappings/ripe.yarrrml.yml` only for newly published
-   fields. Existing mapped checks can continue through the shared path.
-4. Change RIPE-O only if the new data requires concepts or relationships that the
-   current ontology cannot express.
-5. Update the private policy for `2.0.0`, the v2 cutoff, approved reviewer UUIDs,
-   included RV IDs, exclusions, and expected counts.
-6. Run the same `make release-local` command with `RELEASE_VERSION=1.2.0` and
-   verify the generated candidate before deployment.
+Defaults:
 
-PostgreSQL extraction, public ID generation, reviewer indexing, OpenAlex,
-YARRRML/RMLMapper execution, validation, manifests, and GraphDB verification are
-shared and should not be duplicated for v2.
+| Variable | Default |
+| --- | --- |
+| `RELEASE_VERSION` | `1.1.0` |
+| `RELEASE_OUTPUT` | `.build/1.1.0` |
+| `RELEASE_POLICY` | `private/release-policy.json` |
+| `REVIEWER_INDEX` | `private/reviewer-index.json` |
+
+For a new candidate:
+
+```sh
+RELEASE_VERSION=1.2.0 RELEASE_OUTPUT=.build/1.2.0 make release
+```
+
+The pipeline:
+
+1. Reads completed jobs in a read-only transaction, constrained by the policy's
+   source version and date range.
+2. Selects assessments with one accepted human-reviewed `OVERALL` answer,
+   applies exclusions, and assigns stable assessment and reviewer identifiers.
+3. Removes private fields and retains the assessment content used by the mapping.
+4. Enriches DOI records, preprocesses the JSON, and executes YARRRML and RMLMapper.
+5. Validates privacy, expected counts, RDF structure, and reviewer coverage, then
+   writes the manifest and checksums.
+
+The candidate directory and reviewer index are updated only after file and RDF
+validation succeeds. OpenAlex records come from the cache where available;
+uncached lookups use the API. Cached missing records are not automatically retried.
+
+`make release-local` also loads the candidate into a scratch GraphDB repository
+and checks inference. This recreates the repository selected by
+`GRAPHDB_REPOSITORY` (default `ripe`). Use a disposable local repository. The
+command refuses to recreate a versioned release repository.
+
+## Serve a release
+
+For local setup and query examples, see the [main README](../../README.md#run-locally).
+The [release catalog](../../ui/src/lib/releases.json) pins each snapshot's source
+commit, data checksum, counts, and ontology version. Downloads are generated
+under `ui/public/data/`; each serialization is checked against the source RDF.
+
+`load-graphdb.py` refuses to replace an existing repository. It checks counts
+and inference, enables read-only mode, restarts the repository to activate it,
+and verifies that an empty update is rejected. Repository names are
+`ripe-1-0-0` and `ripe-1-1-0`.
+
+Application settings are listed in [ui/.env.example](../../ui/.env.example).
+`GRAPHDB_BASE_URL` selects the server; the release selects its repository.
+`RIPE_KG_VERSION` controls unversioned URLs. Both releases use RIPE-O 1.0.0.
+
+The API allows 30 requests per minute per identity. By default, all callers
+share one budget. Set `RIPE_TRUST_CF_CONNECTING_IP=true` only when the origin
+is private and reachable exclusively through Cloudflare. Missing or invalid
+CF-Connecting-IP then returns 503. Request budgets are local to the UI process.
+
+## Deploy
+
+Run from the repository root:
+
+```sh
+make prepare-downloads
+docker build -f ui/Dockerfile -t ripe-kg-ui:release .
+export RIPE_UI_IMAGE="$(docker image inspect ripe-kg-ui:release --format '{{.Id}}')"
+docker compose -f deploy/compose.yml up -d --wait graphdb
+make load-release RELEASE_VERSION=1.0.0 GRAPHDB_BASE=http://localhost:17200
+make load-release RELEASE_VERSION=1.1.0 GRAPHDB_BASE=http://localhost:17200
+docker compose -f deploy/compose.yml up -d --wait ui
+uv run python scripts/release/verify-service.py --base http://localhost:13000
+```
+
+The [Compose file](../../deploy/compose.yml) uses a separate database volume and
+loopback ports 17200 and 13000. `RIPE_GRAPHDB_PORT` and `RIPE_UI_PORT` can change
+these; update the load and verification commands accordingly. Transfer the
+reviewed image to the host before using its image ID, or use a registry digest.
+
+Preserve the existing image, database and ingress configuration for rollback.
+Verify the candidate before switching the ingress to its UI port. Check both
+release health endpoints through the public hostname after switching. Roll back
+by restoring the previous ingress destination; retain the old database volume.
+For database backups, stop GraphDB before copying its volume or use its supported
+backup mechanism. Do not start an older GraphDB image against an upgraded volume.
+
+W3ID rules live in [perma-id/w3id.org](https://github.com/perma-id/w3id.org/tree/master/ripe).
+Update them only after the destination URLs work; API redirects must preserve POST.
+
+## Paper statistics
+
+Set `GRAPHDB_ARTIFACT_ROOT` and `GRAPHDB_REPOSITORY` to the same snapshot when
+running `make paper-stats`. The script compares assessment ID sets and refuses
+mixed snapshots. Published 1.0.0 statistics must use the 1.0.0 data.
