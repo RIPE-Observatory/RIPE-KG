@@ -12,7 +12,8 @@ dist/
 main.py
 .uv-cache
 tools/
-.env
+.env*
+!.env.example
 assessments/*.tmp
 
 # Large binary tools
@@ -34,3 +35,7 @@ backups/
 private/
 docker-compose.prod.yml
 ui/tsconfig.tsbuildinfo
+
+# Generated release distributions and editor worker
+ui/public/data/
+ui/public/vendor/
