@@ -56,7 +56,7 @@ services:
         - CMD
         - node
         - -e
-        - "Promise.all(['1.0.0','1.1.0'].map(v=>fetch('http://127.0.0.1:3000/releases/'+v+'/api/health',{signal:AbortSignal.timeout(5000)}))).then(rs=>process.exit(rs.every(r=>r.ok)?0:1)).catch(()=>process.exit(1))"
+        - "Promise.all(['1.0.0','1.1.0'].map(v=>fetch('http://127.0.0.1:3000/'+v+'/api/health',{signal:AbortSignal.timeout(5000)}))).then(rs=>process.exit(rs.every(r=>r.ok)?0:1)).catch(()=>process.exit(1))"
       interval: 30s
       timeout: 7s
       retries: 3

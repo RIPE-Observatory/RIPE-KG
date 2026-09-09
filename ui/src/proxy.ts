@@ -6,6 +6,7 @@ import {
 } from "@/lib/iri";
 
 import { defaultVersion } from "@/lib/version-endpoints";
+import { negotiate, RDF_FORMATS } from "@/lib/content-negotiation";
 import { isKgVersion, legacyReleasePath, PATH_HEADER, releasePath, VERSION_HEADER } from "@/lib/versions";
 
 function notFoundResponse() {
@@ -24,9 +25,9 @@ export function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   const legacyPath = legacyReleasePath(url.pathname);
   if (legacyPath) url.pathname = legacyPath;
-  const release = url.pathname.match(/^\/releases\/([^/]+)(\/.*)?$/);
+  const release = url.pathname.match(/^\/(\d+\.\d+\.\d+)(\/.*)?$/);
   const requested = url.searchParams.getAll("version");
-  if (release && !isKgVersion(release[1])) return notFoundResponse();
+  if ((release && !isKgVersion(release[1])) || (legacyPath && !release)) return notFoundResponse();
   if (requested.length > 1 || (requested.length === 1 && !isKgVersion(requested[0])) ||
       (release && requested.length && requested[0] !== release[1])) {
     return NextResponse.json({ error: "Unknown or conflicting RIPE-KG version" }, {
@@ -76,6 +77,26 @@ export function proxy(request: NextRequest) {
   }
 
   const response = NextResponse.next({ request: { headers: upstream } });
+  if (release && pathname === "/") {
+    const format = negotiate(request.headers.get("accept"));
+    const headers = {
+      Vary: "Accept",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Expose-Headers": VERSION_HEADER,
+      [VERSION_HEADER]: version,
+      "Cache-Control": "no-store",
+      Link: Object.entries(RDF_FORMATS).map(([type, ext]) =>
+        `</data/${version}/ripe-data.${ext}>; rel="alternate"; type="${type}"`
+      ).join(", "),
+    };
+    if (!format) return new NextResponse("Not Acceptable", { status: 406, headers });
+    if (format !== "text/html") {
+      url.pathname = `/data/${version}/ripe-data.${RDF_FORMATS[format]}`;
+      url.search = "";
+      return NextResponse.redirect(url, { status: 303, headers });
+    }
+    for (const [key, value] of Object.entries(headers)) response.headers.set(key, value);
+  }
   response.headers.set(VERSION_HEADER, version);
   return response;
 }

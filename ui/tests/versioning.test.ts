@@ -25,13 +25,13 @@ test("content negotiation observes quality, specificity and exclusions", () => {
 });
 
 test("version links preserve entity IDs, query strings and fragments", () => {
-  assert.equal(versionedHref("/ripe-kg/author/RIPEAU1234?x=1#part", "1.0.0"), "/releases/1.0.0/ripe-kg/author/RIPEAU1234?x=1#part");
-  assert.equal(versionedHref("/publications/10.123%2Ftest", "1.0.0"), "/releases/1.0.0/publications/10.123%2Ftest");
-  assert.equal(versionedHref("/", "1.1.0"), "/releases/1.1.0/explore");
-  for (const path of ["https://example.org/", "//example.org/", "/ripe-o/1.0.0", "/webvowl/index.html", "/releases/1.0.0/explore"]) {
+  assert.equal(versionedHref("/ripe-kg/author/RIPEAU1234?x=1#part", "1.0.0"), "/1.0.0/ripe-kg/author/RIPEAU1234?x=1#part");
+  assert.equal(versionedHref("/publications/10.123%2Ftest", "1.0.0"), "/1.0.0/publications/10.123%2Ftest");
+  assert.equal(versionedHref("/", "1.1.0"), "/1.1.0");
+  for (const path of ["https://example.org/", "//example.org/", "/ripe-o/1.0.0", "/webvowl/index.html", "/1.0.0/explore"]) {
     assert.equal(versionedHref(path, "1.1.0"), path);
   }
-  assert.equal(stripReleasePath("/releases/1.0.0/explore"), "/explore");
+  assert.equal(stripReleasePath("/1.0.0/explore"), "/explore");
   for (const value of ["1.2.0", "1.1", "__proto__", "constructor", "../ripe"]) assert.equal(isKgVersion(value), false);
 });
 
@@ -42,14 +42,17 @@ test("all bundled sample queries parse as read-only SPARQL", () => {
 });
 
 test("legacy release destinations retain snapshot and resource paths", () => {
-  assert.equal(legacyReleasePath("/ripe-kg/1.0.0"), "/releases/1.0.0");
-  assert.equal(legacyReleasePath("/ripe-kg/1.1.0/"), "/releases/1.1.0");
-  assert.equal(legacyReleasePath("/ripe-kg/1.0.0/api/sparql"), "/releases/1.0.0/api/sparql");
-  assert.equal(legacyReleasePath("/ripe-kg/1.1.0/explore"), "/releases/1.1.0/explore");
-  assert.equal(legacyReleasePath("/ripe-kg/1.0.0/work/10.123%2Fexample"), "/releases/1.0.0/ripe-kg/work/10.123%2Fexample");
-  assert.equal(legacyReleasePath("/ripe-kg/9.9.9"), "/releases/9.9.9");
+  assert.equal(legacyReleasePath("/ripe-kg/1.0.0"), "/1.0.0");
+  assert.equal(legacyReleasePath("/ripe-kg/1.1.0/"), "/1.1.0");
+  assert.equal(legacyReleasePath("/ripe-kg/1.0.0/api/sparql"), "/1.0.0/api/sparql");
+  assert.equal(legacyReleasePath("/ripe-kg/1.1.0/explore"), "/1.1.0");
+  assert.equal(legacyReleasePath("/ripe-kg/1.0.0/work/10.123%2Fexample"), "/1.0.0/ripe-kg/work/10.123%2Fexample");
+  assert.equal(legacyReleasePath("/ripe-kg/9.9.9"), "/9.9.9");
   assert.equal(legacyReleasePath("/ripe-kg/work/10.123/example"), null);
-  assert.equal(legacyReleasePath("/releases/1.0.0"), null);
+  assert.equal(legacyReleasePath("/1.0.0"), null);
+  assert.equal(legacyReleasePath("/releases/1.0.0"), "/1.0.0");
+  assert.equal(legacyReleasePath("/releases/1.1.0/explore"), "/1.1.0");
+  assert.equal(legacyReleasePath("/releases/1.0.0/api/sparql"), "/1.0.0/api/sparql");
 });
 
 test("ASK and keyword text are valid; updates and malformed queries are rejected", () => {

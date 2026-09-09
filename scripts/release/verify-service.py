@@ -86,9 +86,10 @@ def main():
     count_query = "PREFIX ripe: <https://w3id.org/ripe/ripe-o#> SELECT (COUNT(DISTINCT ?a) AS ?n) WHERE { ?a a ripe:ResearchIntegrityAssessment }"
 
     for version, release in RELEASES.items():
-        prefix = f"/releases/{version}"
-        headers, _ = get(prefix, 303)
-        assert headers["Location"] == prefix + "/explore"
+        prefix = f"/{version}"
+        headers, _ = get(prefix)
+        assert headers["X-RIPE-KG-Version"] == version
+        assert "Accept" in headers.get("Vary", "")
         for mime, (ext, format_name) in FORMATS.items():
             headers, _ = get(prefix, 303, accept=mime)
             assert headers["Location"] == f"/data/{version}/ripe-data.{ext}"
@@ -207,7 +208,7 @@ def main():
             path = prefix + "/ripe-kg/" + suffix
             headers, body = get(path, status)
             assert headers["X-RIPE-KG-Version"] == version
-            assert f'href="{prefix}/explore"' in body.decode()
+            assert f'href="{prefix}"' in body.decode()
             for mime, (_, format_name) in FORMATS.items():
                 headers, body = get(path, status, accept=mime)
                 if status == 200:
@@ -242,32 +243,40 @@ def main():
             + "/ripe-kg/research-integrity-assessment/"
             + shared_id
         )
+        for suffix in ["", "/explore", "/sparql", "/api/health"]:
+            headers, _ = get(f"/releases/{version}{suffix}", 307)
+            destination = prefix + ("" if suffix == "/explore" else suffix)
+            assert urljoin(args.base, headers["Location"]) == args.base.rstrip("/") + destination
+        headers, _ = get(f"/releases/{version}/api/sparql", 307, data=count_query)
+        assert urljoin(args.base, headers["Location"]) == args.base.rstrip("/") + prefix + "/api/sparql"
         print(
             f"PASS {version}: downloads, API methods, counts, HTML links, shared/new resources in four RDF formats"
         )
 
     # The proxy must replace, not trust, caller-provided routing headers.
     headers, body = get(
-        "/releases/1.0.0/api/sparql",
+        "/1.0.0/api/sparql",
         data=count_query,
         extra={"X-RIPE-KG-Version": "1.1.0"},
     )
     assert json.loads(body)["results"]["bindings"][0]["n"]["value"] == "140"
-    headers, _ = get("/releases/9.9.9/api/sparql", 404, data="ASK {}")
+    headers, _ = get("/9.9.9/api/sparql", 404, data="ASK {}")
     assert headers["Access-Control-Allow-Origin"] == "*"
     get("/ripe-kg/9.9.9", 404)
+    for path in ["", "/sparql", "/api/health", "/api/sparql", "/ripe-kg/work/example"]:
+        get("/not-a-version" + path, 404)
     get("/ripe-kg/1.0.0/api/sparql?version=1.1.0", 400, data="ASK {}")
     headers, _ = get("/api/sparql?version=9.9.9", 400, data="ASK {}")
     assert headers["Access-Control-Allow-Origin"] == "*"
     get("/api/sparql?version=1.0.0&version=1.1.0", 400, data="ASK {}")
-    get("/releases/1.0.0/api/sparql?version=1.1.0", 400, data="ASK {}")
+    get("/1.0.0/api/sparql?version=1.1.0", 400, data="ASK {}")
     get(
-        "/releases/1.0.0/api/sparql",
+        "/1.0.0/api/sparql",
         400,
         data="INSERT DATA { <urn:a> <urn:b> <urn:c> }",
     )
     get(
-        "/releases/1.0.0/api/sparql",
+        "/1.0.0/api/sparql",
         400,
         data="SELECT * { SERVICE # comment\n <http://127.0.0.1/> { ?s ?p ?o } }",
     )
@@ -275,12 +284,12 @@ def main():
     assert headers["X-RIPE-KG-Version"] == "1.1.0"
     assert json.loads(body)["results"]["bindings"][0]["n"]["value"] == "185"
     headers, _ = get("/", 307)
-    assert headers["Location"] == "/releases/1.1.0/explore"
+    assert headers["Location"] == "/1.1.0"
     assert headers["X-RIPE-KG-Version"] == "1.1.0"
     for path in ["/explore", "/sparql"]:
         headers, body = get(path)
         assert headers["X-RIPE-KG-Version"] == "1.1.0"
-        assert 'href="/releases/1.1.0/explore"' in body.decode()
+        assert 'href="/1.1.0"' in body.decode()
 
     print(f"PASS {checks} HTTP checks; slowest responses (including RDF transfer):")
     for path, ms in sorted(timings, key=lambda entry: -entry[1])[:8]:

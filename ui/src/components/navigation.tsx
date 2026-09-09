@@ -13,7 +13,8 @@ const navItems = [
 ];
 
 export function Navigation() {
-  const pathname = stripReleasePath(usePathname());
+  const currentPath = stripReleasePath(usePathname());
+  const pathname = currentPath === "/" ? "/explore" : currentPath;
   const version = useKgVersion();
   const [menuOpen, setMenuOpen] = useState(false);
 

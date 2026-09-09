@@ -62,11 +62,11 @@ configuration.
 
 ## Query a release
 
-Use `/releases/<version>/explore`, `/sparql`, `/api/sparql`, or `/api/health`
-under the selected release prefix. For example:
+Open `/<version>` to explore a release. Its workbench and API are at
+`/<version>/sparql`, `/<version>/api/sparql`, and `/<version>/api/health`. For example:
 
 ```sh
-curl --fail http://localhost:3000/releases/1.1.0/api/sparql \
+curl --fail http://localhost:3000/1.1.0/api/sparql \
   -H 'Content-Type: application/sparql-query' \
   --data 'PREFIX ripe: <https://w3id.org/ripe/ripe-o#>
 SELECT (COUNT(?assessment) AS ?count)
@@ -80,7 +80,7 @@ supported. Query execution is limited to 30 seconds and SELECT results to
 workbench; CSV export requires a smaller result. Federation is restricted to
 the explicit SemOpenAlex service IRI.
 
-Release roots such as `/releases/1.1.0` support content negotiation for HTML,
+Release roots such as `/1.1.0` support content negotiation for HTML,
 Turtle, JSON-LD, RDF/XML, and N-Triples. Entity identifiers remain stable across
 releases; a versioned description URL selects the snapshot describing an entity.
 

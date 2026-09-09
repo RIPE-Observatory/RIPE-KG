@@ -12,17 +12,19 @@ export function isKgVersion(value: string): value is KgVersion {
 }
 
 export function releasePath(version: KgVersion, path = ""): string {
-  return `/releases/${version}${path}`;
+  return `/${version}${path === "/explore" ? "" : path}`;
 }
 
 export function legacyReleasePath(path: string): string | null {
+  const published = path.match(/^\/releases\/([^/]+)(\/.*)?$/);
+  if (published) return `/${published[1]}${published[2] === "/explore" ? "" : published[2] || ""}`;
   const match = path.match(/^\/ripe-kg\/(\d+\.\d+\.\d+)(\/.*)?$/);
   if (!match) return null;
   const suffix = match[2] === "/" ? "" : match[2] || "";
   const route = !suffix || /^\/(?:explore|sparql|ontology|api\/(?:sparql|health))\/?$/.test(suffix)
     ? suffix
     : `/ripe-kg${suffix}`;
-  return `/releases/${match[1]}${route}`;
+  return `/${match[1]}${route === "/explore" ? "" : route}`;
 }
 
 export function versionedHref(href: string, version: KgVersion): string {
@@ -33,5 +35,5 @@ export function versionedHref(href: string, version: KgVersion): string {
 }
 
 export function stripReleasePath(path: string): string {
-  return path.replace(/^\/releases\/[^/]+(?=\/|$)/, "") || "/";
+  return path.replace(/^\/\d+\.\d+\.\d+(?=\/|$)/, "") || "/";
 }
