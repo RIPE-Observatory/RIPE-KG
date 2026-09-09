@@ -1,9 +1,0 @@
-node_modules
-.next
-out
-coverage
-.env*
-!.env.example
-logs
-test-screenshots
-*.tsbuildinfo
