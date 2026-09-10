@@ -158,7 +158,7 @@ export async function fetchPublicationByDoi(
 ): Promise<PublicationMeta | null> {
   const escaped = esc(doi);
   const sparql = `${PREFIXES}
-    SELECT (SAMPLE(?titleValue) AS ?title)
+    SELECT (COUNT(DISTINCT ?work) AS ?workCount) (SAMPLE(?titleValue) AS ?title)
            (SAMPLE(?journalValue) AS ?journal)
            (SAMPLE(?publisherValue) AS ?publisher)
            (SAMPLE(?pubDateValue) AS ?pubDate)
@@ -189,7 +189,7 @@ export async function fetchPublicationByDoi(
     }`;
 
   const rows = await serverQuery(sparql);
-  if (rows.length === 0) return null;
+  if (!rows.length || intVal(rows[0], "workCount") === 0) return null;
   const r = rows[0];
   return {
     title: val(r, "title"),

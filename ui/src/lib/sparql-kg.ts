@@ -21,7 +21,8 @@ async function query(sparql: string, version?: KgVersion): Promise<SparqlBinding
 export async function searchPublications(
   term: string,
   limit = 20,
-  version?: KgVersion
+  version?: KgVersion,
+  offset = 0
 ): Promise<PublicationSearchResult[]> {
   const escaped = esc(term);
   const sparql = `${PREFIXES}
@@ -43,8 +44,8 @@ export async function searchPublications(
       )
     }
     GROUP BY ?doi
-    ORDER BY DESC(?assessmentCount)
-    LIMIT ${limit}`;
+    ORDER BY DESC(?assessmentCount) ?doi
+    LIMIT ${limit} OFFSET ${offset}`;
 
   const rows = await query(sparql, version);
   return rows.map((r) => ({
@@ -58,7 +59,8 @@ export async function searchPublications(
 export async function searchAuthors(
   term: string,
   limit = 20,
-  version?: KgVersion
+  version?: KgVersion,
+  offset = 0
 ): Promise<AuthorSearchResult[]> {
   const escaped = esc(term);
   const sparql = `${PREFIXES}
@@ -80,8 +82,8 @@ export async function searchAuthors(
       FILTER(CONTAINS(LCASE(?name), LCASE("${escaped}")))
     }
     GROUP BY ?name ?authorId
-    ORDER BY DESC(?assessmentCount)
-    LIMIT ${limit}`;
+    ORDER BY DESC(?assessmentCount) ?authorId ?name
+    LIMIT ${limit} OFFSET ${offset}`;
 
   const rows = await query(sparql, version);
   return rows.map((r) => ({

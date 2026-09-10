@@ -1,14 +1,17 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 export function InfoTooltip({ text }: { text: string }) {
+  const id = useId();
   return (
-    <span
-      aria-label={text}
-      title={text}
-      className="normal-case ml-1 inline-flex size-4 cursor-help items-center justify-center rounded-full border border-stone-300 text-[10px] font-bold leading-none text-stone-700"
-    >
-      i
-    </span>
+    <>
+      <button type="button" popoverTarget={id} aria-label={text}
+        className="normal-case ml-1 inline-flex size-4 cursor-help items-center justify-center rounded-full border border-stone-300 text-[10px] font-bold leading-none text-stone-700 focus-visible:outline-2 focus-visible:outline-amber-800">
+        i
+      </button>
+      <span id={id} popover="auto" className="m-auto max-w-[min(28rem,calc(100vw-2rem))] border border-stone-300 bg-white p-4 text-left text-base font-normal normal-case tracking-normal text-stone-900 shadow-lg">
+        {text}
+      </span>
+    </>
   );
 }
 

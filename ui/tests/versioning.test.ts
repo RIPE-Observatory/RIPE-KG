@@ -71,3 +71,10 @@ test("SERVICE cannot escape the allowlist through comments, prefixes or nesting"
     "SELECT * { { SELECT * { SERVICE SILENT <http://localhost/> { ?s ?p ?o } } } }",
   ]) assert.ok(validateQuery(query), query);
 });
+
+test("RDF identifiers use the same strict percent encoding as the data pipeline", async () => {
+  const { encodeIriSegment, ripeKgIri } = await import("../src/lib/iri");
+  assert.equal(encodeIriSegment("10.1016/0005-7967(90)90135-6"), "10.1016%2F0005-7967%2890%2990135-6");
+  assert.equal(encodeIriSegment("!'()* ~é%"), "%21%27%28%29%2A%20~%C3%A9%25");
+  assert.equal(ripeKgIri("work", "10.1/a(b)"), "https://w3id.org/ripe/ripe-kg/work/10.1%2Fa%28b%29");
+});

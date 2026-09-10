@@ -116,7 +116,7 @@ async function execute(request: NextRequest) {
     return NextResponse.json(data, { headers: responseHeaders });
   } catch (failure) {
     const timeout = failure instanceof Error && ["TimeoutError", "AbortError"].includes(failure.name);
-    return error(timeout ? "Query exceeded the 30-second limit" : "Selected release is unavailable", timeout ? 504 : 503);
+    return error(timeout ? "Query exceeded the 30-second limit" : "Selected version is unavailable", timeout ? 504 : 503);
   }
 }
 

@@ -30,8 +30,8 @@ export function Navigation() {
         </Link>
 
         <label className="text-sm text-stone-600 flex items-center gap-2">
-          <span className="hidden sm:inline">Release</span>
-          <select aria-label="KG release" value={version} className="bg-transparent border border-stone-300 rounded px-2 py-1"
+          <span className="hidden sm:inline">Version</span>
+          <select aria-label="Knowledge graph version" value={version} className="bg-transparent border border-stone-300 rounded px-2 py-1"
             onChange={(event) => {
               const selected = event.target.value as keyof typeof RELEASES;
               // A full navigation also clears pending workbench results and client caches.

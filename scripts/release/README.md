@@ -101,6 +101,9 @@ The API allows 30 requests per minute per identity. By default, all callers
 share one budget. Set `RIPE_TRUST_CF_CONNECTING_IP=true` only when the origin
 is private and reachable exclusively through Cloudflare. Missing or invalid
 CF-Connecting-IP then returns 503. Request budgets are local to the UI process.
+The production tunnel connects directly to loopback port 3000. The old nginx
+virtual host redirects to the public HTTPS hostname; it must never proxy directly
+to the application while Cloudflare headers are trusted.
 
 ## Deploy
 
@@ -128,6 +131,11 @@ release health endpoints through the public hostname after switching. Roll back
 by restoring the previous ingress destination; retain the old database volume.
 For database backups, stop GraphDB before copying its volume or use its supported
 backup mechanism. Do not start an older GraphDB image against an upgraded volume.
+Copy each immutable version backup to a separate host, compare SHA-256 hashes
+at both destinations, and restore the off-host copy in an isolated container
+before accepting the backup. The 2026-09-10 copies are on Neumann under
+`/srv/data/ripe-kg-backups/2026-09-10/`. Repeat this when a version is added or
+repository configuration changes.
 
 W3ID rules live in [perma-id/w3id.org](https://github.com/perma-id/w3id.org/tree/master/ripe).
 Update them only after the destination URLs work; API redirects must preserve POST.

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { NextRequest } from "next/server";
-import { localHrefForIri, RIPE_KG_BASE, RIPE_ONTOLOGY_BASE } from "./iri";
+import { encodeIriSegment, localHrefForIri, RIPE_KG_BASE, RIPE_ONTOLOGY_BASE } from "./iri";
 
 import { endpointForVersion, defaultVersion } from "./version-endpoints";
 import { isKgVersion, PATH_HEADER, VERSION_HEADER, versionedHref, type KgVersion } from "./versions";
@@ -25,7 +25,7 @@ interface TripleRow {
 }
 
 export function resourceUriFromSegments(segments: string[]): string {
-  return RIPE_KG_BASE + segments.map((segment) => encodeURIComponent(segment)).join("/");
+  return RIPE_KG_BASE + segments.map(encodeIriSegment).join("/");
 }
 
 export function isSupportedResourceUri(uri: string): boolean {
@@ -136,7 +136,7 @@ WHERE {
   }
 }
 ORDER BY ?subject ?predicate ?object
-LIMIT 500`;
+LIMIT 501`;
 
   const response = await sparqlRequest(query, "application/sparql-results+json", version);
   if (!response.ok) {
@@ -195,7 +195,7 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
     return `<a href="${escapeHtml(href)}" data-format="${format}">${format}</a>`;
   }).join("");
 
-  const rowHtml = rows.map((row) => `
+  const rowHtml = rows.slice(0, 500).map((row) => `
     <tr>
       <td>${renderTerm(row.subject, row.subjectLabel, version)}</td>
       <td><code>${linkify(row.predicate, version)}</code></td>
@@ -243,7 +243,7 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
     .nav-links a:hover { color: #1c1917; }
     main { max-width: 1480px; margin: 0 auto; padding: 48px 32px 80px; }
     .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; line-height: 1.2; text-transform: uppercase; color: #78716c; }
-    h1 { font-family: Georgia, "Libre Baskerville", serif; font-weight: 400; font-size: clamp(30px, 4vw, 48px); line-height: 1.12; margin: 12px 0 10px; max-width: 1100px; }
+    h1 { overflow-wrap: anywhere; font-family: Georgia, "Libre Baskerville", serif; font-weight: 400; font-size: clamp(30px, 4vw, 48px); line-height: 1.12; margin: 12px 0 10px; max-width: 1100px; }
     .iri { display: block; max-width: 100%; overflow-wrap: anywhere; font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted-foreground); background: transparent; border: 0; padding: 0; }
     .formats { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 32px; }
     .formats a { border: 1px solid var(--border-strong); background: var(--surface); padding: 8px 10px; font-size: 13px; font-weight: 700; line-height: 1; text-decoration: none; }
@@ -276,10 +276,11 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
     </div>
   </header>
   <main>
-    <div class="eyebrow">RIPE-KG ${version} · Resource</div>
+    <div class="eyebrow">RIPE-KG · Version ${version} · Resource</div>
     <h1>${escapeHtml(title)}</h1>
     <code class="iri">${escapeHtml(uri)}</code>
     <nav class="formats" aria-label="RDF serializations">${downloadLinks}</nav>
+    ${rows.length > 500 ? `<p>Showing the first 500 statements. Download an RDF format above to view all statements for this resource.</p>` : ""}
     ${rows.length > 0 ? `
       <div class="table-wrap">
         <table>
@@ -287,7 +288,7 @@ function renderHtml(request: NextRequest, uri: string, rows: TripleRow[]): strin
           <tbody>${rowHtml}</tbody>
         </table>
       </div>
-    ` : `<div class="empty">No triples were found for this resource in the RIPE repository.</div>`}
+    ` : `<div class="empty">This version does not contain this resource.</div>`}
   </main>
   <script>
     document.querySelectorAll("[data-format]").forEach((link) => {

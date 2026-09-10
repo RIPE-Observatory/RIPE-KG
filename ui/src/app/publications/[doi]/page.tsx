@@ -11,6 +11,11 @@ import { OutcomeDot, outcomeLabel, overallColor, BackArrow, ExternalLink, InfoTo
 import { RQ_META, RQ_ORDER, type AssessmentForPublication, type AssessmentOutcome } from "@/lib/sparql-types";
 import { ExpandableAuthorList } from "@/components/expandable-author-list";
 
+function publicationDoi(value: string): string {
+  try { return decodeURIComponent(value); }
+  catch { notFound(); }
+}
+
 const RQ_HEADERS: { label: string; question: string }[] = [
   { label: "Q1.1", question: RQ_META["retraction-question"].question },
   { label: "Q1.2", question: RQ_META["post-publication-question"].question },
@@ -44,7 +49,7 @@ export async function generateMetadata({
   params: Promise<{ doi: string }>;
 }): Promise<Metadata> {
   const { doi: rawDoi } = await params;
-  const doi = decodeURIComponent(rawDoi);
+  const doi = publicationDoi(rawDoi);
   const pub = await fetchPublicationByDoi(doi);
   const title = pub ? cleanDisplayText(pub.title) : "Publication";
   return {
@@ -59,7 +64,7 @@ export default async function PublicationPage({
   params: Promise<{ doi: string }>;
 }) {
   const { doi: rawDoi } = await params;
-  const doi = decodeURIComponent(rawDoi);
+  const doi = publicationDoi(rawDoi);
 
   const [pub, authors, assessments] = await Promise.all([
     fetchPublicationByDoi(doi),
@@ -192,9 +197,9 @@ export default async function PublicationPage({
             <div className="relative">
               <div className="line-draw-vertical absolute left-0 top-0 h-full" />
               <div className="pl-6 space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-700">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-stone-700">
                   Publication Details
-                </h3>
+                </h2>
 
                 {pub.doi && (
                   <DetailField label="DOI">

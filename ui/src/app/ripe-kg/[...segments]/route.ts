@@ -14,7 +14,7 @@ export async function GET(
     return response;
   } catch (error) {
     const timeout = error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name);
-    return new Response(timeout ? "Resource query timed out" : "Selected release is unavailable", {
+    return new Response(timeout ? "Resource query timed out" : "Selected version is unavailable", {
       status: timeout ? 504 : 503,
       headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
     });

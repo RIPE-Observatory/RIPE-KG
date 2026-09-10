@@ -7,8 +7,13 @@ export const ASSESSMENT_ID_PATTERN = /^RIPEA[A-F0-9]{16}$/u;
 export const REVIEWER_ID_PATTERN = /^RV\d{3}$/u;
 export const LOCAL_AUTHOR_ID_PATTERN = /^(RIPEAU[A-F0-9]{16}|pubpeer-RIPEA[A-F0-9]{16}-\d+)$/u;
 
+// Match Python urllib.parse.quote(..., safe="") used when minting RDF identifiers.
+export function encodeIriSegment(value: string): string {
+  return encodeURIComponent(value).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+}
+
 export function ripeKgIri(segment: string, id: string): string {
-  return `${RIPE_KG_BASE}${segment}/${encodeURIComponent(id)}`;
+  return `${RIPE_KG_BASE}${segment}/${encodeIriSegment(id)}`;
 }
 
 export function localNameFromIri(iri: string): string {

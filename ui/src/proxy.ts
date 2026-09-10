@@ -48,19 +48,20 @@ export function proxy(request: NextRequest) {
     });
   }
   const pathname = release ? release[2] || "/" : url.pathname;
+  const redirectHeaders = { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*", "Access-Control-Expose-Headers": VERSION_HEADER, [VERSION_HEADER]: version };
   const upstream = new Headers(request.headers);
   upstream.set(VERSION_HEADER, version);
   upstream.set(PATH_HEADER, request.nextUrl.pathname + request.nextUrl.search);
 
   // Compatibility selector for existing API clients; UI URLs become explicit.
   if (requested.length && !release && pathname !== "/api/sparql") {
-    url.pathname = releasePath(version, pathname === "/" ? "/explore" : pathname);
+    url.pathname = releasePath(version, pathname === "/" ? "" : pathname);
     url.searchParams.delete("version");
-    return NextResponse.redirect(url, { status: 307, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.redirect(url, { status: 307, headers: redirectHeaders });
   }
-  if (pathname === "/ripe-kg") {
+  if ((!release && pathname === "/") || pathname === "/ripe-kg") {
     url.pathname = releasePath(version);
-    return NextResponse.redirect(url, { status: 303, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.redirect(url, { status: 303, headers: redirectHeaders });
   }
 
   if (pathname.startsWith("/assessments/")) {

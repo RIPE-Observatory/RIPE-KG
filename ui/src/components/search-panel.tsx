@@ -31,6 +31,7 @@ export function SearchPanel() {
   const [searchInput, setSearchInput] = useState(initialQuery);
   const debouncedTerm = useDebounce(searchInput, 300);
   const [searchMode, setSearchMode] = useState<SearchMode>(initialMode);
+  const [page, setPage] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
 
   const updateUrl = useCallback(
@@ -45,24 +46,26 @@ export function SearchPanel() {
   );
 
   const handleSearchChange = (value: string) => {
+    setPage(0);
     setSearchInput(value);
     updateUrl(value, searchMode);
   };
 
   const handleModeChange = (mode: SearchMode) => {
+    setPage(0);
     setSearchMode(mode);
     updateUrl(searchInput, mode);
   };
 
   const pubQuery = useQuery({
-    queryKey: [version, ...queryKeys.publications.search(debouncedTerm)],
-    queryFn: () => searchPublications(debouncedTerm, 20, version),
+    queryKey: [version, ...queryKeys.publications.search(debouncedTerm), page],
+    queryFn: () => searchPublications(debouncedTerm, 21, version, page * 20),
     enabled: debouncedTerm.length >= 2 && searchMode === "publications",
   });
 
   const authorQuery = useQuery({
-    queryKey: [version, ...queryKeys.authors.search(debouncedTerm)],
-    queryFn: () => searchAuthors(debouncedTerm, 20, version),
+    queryKey: [version, ...queryKeys.authors.search(debouncedTerm), page],
+    queryFn: () => searchAuthors(debouncedTerm, 21, version, page * 20),
     enabled: debouncedTerm.length >= 2 && searchMode === "authors",
   });
 
@@ -70,8 +73,9 @@ export function SearchPanel() {
   const isLoading =
     (searchMode === "publications" && pubQuery.isFetching) ||
     (searchMode === "authors" && authorQuery.isFetching);
-  const publications = pubQuery.data ?? [];
-  const authors = authorQuery.data ?? [];
+  const publications = (pubQuery.data ?? []).slice(0, 20);
+  const authors = (authorQuery.data ?? []).slice(0, 20);
+  const hasNextPage = (searchMode === "publications" ? pubQuery.data : authorQuery.data)?.length === 21;
 
   const resultCount =
     searchMode === "publications" ? publications.length : authors.length;
@@ -177,10 +181,10 @@ export function SearchPanel() {
       </div>
 
       <div aria-live="polite" aria-atomic="false">
-        {isSearching && !isLoading && (
-          <p className="sr-only">
-            {resultCount} {searchMode === "publications" ? "publication" : "author"}
-            {resultCount !== 1 ? "s" : ""} found
+        {isSearching && !activeError && !isLoading && (
+          <p className="font-source text-sm text-stone-600 mt-5">
+            Showing {resultCount} {searchMode === "publications" ? "publication" : "author"}
+            {resultCount !== 1 ? "s" : ""} on page {page + 1}
           </p>
         )}
         {isSearching && activeError && !isLoading && (
@@ -216,6 +220,15 @@ export function SearchPanel() {
               </>
             )}
           </div>
+        )}
+        {isSearching && !activeError && (page > 0 || hasNextPage) && (
+          <nav aria-label="Search results pages" className="flex items-center justify-between mt-4">
+            <button type="button" disabled={page === 0 || isLoading} onClick={() => setPage(page - 1)}
+              className="text-sm font-medium text-amber-800 disabled:opacity-40">Previous</button>
+            <span className="text-sm text-stone-600">Page {page + 1}</span>
+            <button type="button" disabled={!hasNextPage || isLoading} onClick={() => setPage(page + 1)}
+              className="text-sm font-medium text-amber-800 disabled:opacity-40">Next</button>
+          </nav>
         )}
       </div>
     </div>

@@ -35,6 +35,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", default="http://127.0.0.1:13000")
+    parser.add_argument("--client-ip", help="Trusted client header for an isolated test origin")
     args = parser.parse_args()
     opener = urllib.request.build_opener(NoRedirect)
     timings = []
@@ -49,7 +50,7 @@ def main():
         method=None,
     ):
         nonlocal checks
-        headers = {"Accept": accept, **(extra or {})}
+        headers = {"Accept": accept, **({"CF-Connecting-IP": args.client_ip} if args.client_ip else {}), **(extra or {})}
         if data is not None:
             headers.setdefault("Content-Type", "application/sparql-query")
             data = data.encode()
@@ -253,6 +254,29 @@ def main():
             f"PASS {version}: downloads, API methods, counts, HTML links, shared/new resources in four RDF formats"
         )
 
+    # Regressions from the end-to-end review: missing publications and redirects.
+    _, body = get("/1.0.0/publications/10.1002%2Fgin2.70056", 404)
+    assert b"This version does not contain this publication." in body
+    _, body = get("/1.1.0/publications/10.1002%2Fgin2.70056")
+    assert b"Planetary Health" in body
+    get("/1.1.0/publications/%25", 404)
+    for path in ["/", "/ripe-kg", "/?version=1.0.0"]:
+        headers, _ = get(path, 307 if "?" in path else 303, accept="text/turtle")
+        assert headers["Access-Control-Allow-Origin"] == "*"
+    for version, graph in graphs.items():
+        # Check every identifier the former encodeURIComponent implementation lost.
+        resources = sorted({str(s) for s in graph.subjects() if str(s).startswith(KG) and "%28" in str(s)})
+        for resource in resources:
+            path = f"/{version}/ripe-kg/" + resource.removeprefix(KG)
+            get(path)
+            for mime, (_, format_name) in FORMATS.items():
+                _, body = get(path, accept=mime)
+                result = Graph().parse(data=body, format=format_name)
+                assert any(str(s) == resource or str(o) == resource for s, _, o in result)
+        print(f"PASS {version}: {len(resources)} parenthesized identifiers in HTML and all RDF formats")
+    _, body = get("/1.1.0/ripe-kg/automated-agent/inspect-ai/1.0.0")
+    assert b"Showing the first 500 statements" in body
+
     # The proxy must replace, not trust, caller-provided routing headers.
     headers, body = get(
         "/1.0.0/api/sparql",
@@ -283,8 +307,8 @@ def main():
     headers, body = get("/api/sparql", data=count_query)
     assert headers["X-RIPE-KG-Version"] == "1.1.0"
     assert json.loads(body)["results"]["bindings"][0]["n"]["value"] == "185"
-    headers, _ = get("/", 307)
-    assert headers["Location"] == "/1.1.0"
+    headers, _ = get("/", 303)
+    assert urljoin(args.base, headers["Location"]) == args.base.rstrip("/") + "/1.1.0"
     assert headers["X-RIPE-KG-Version"] == "1.1.0"
     for path in ["/explore", "/sparql"]:
         headers, body = get(path)
