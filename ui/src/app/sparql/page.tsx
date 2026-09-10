@@ -66,12 +66,12 @@ export default function SparqlPage() {
         </div>
         <nav className="flex-1 overflow-y-auto py-2" aria-label="Sample queries">
           {QUERY_GROUPS.map((group) => (
-            <div key={group.label} className="mb-1">
-              <div className="px-5 pt-3 pb-1">
+            <details key={group.label} name="sample-query-group" className="mb-1" open={group.label === "Overview"}>
+              <summary className="cursor-pointer px-5 py-3 hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-amber-800">
                 <span className="font-source text-sm font-semibold text-stone-500 uppercase tracking-widest">
                   {group.label}
                 </span>
-              </div>
+              </summary>
               {group.queries.map((q) => (
                 <button
                   type="button"
@@ -86,7 +86,7 @@ export default function SparqlPage() {
                   {q.name}
                 </button>
               ))}
-            </div>
+            </details>
           ))}
         </nav>
       </aside>

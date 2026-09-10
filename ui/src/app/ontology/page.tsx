@@ -83,15 +83,7 @@ export default function OntologyPage() {
 
   return (
     <section className="flex lg:h-[calc(100vh-64px)] flex-col overflow-hidden bg-[#f7f4ec]">
-      <header className="shrink-0 border-b border-stone-300 bg-[#fffdf8] px-5 py-3">
-        <h1 className="font-libre text-xl text-stone-950">RIPE Ontology Explorer</h1>
-        <p className="font-source text-sm text-stone-600">
-          {CLASSES.length} RIPE classes, {EXTERNAL_CLASSES.length} imported classes,{" "}
-          {OBJECT_PROPERTIES.length} object properties, {DATATYPE_PROPERTIES.length} datatype properties, and{" "}
-          {INSTANCES.length} named individuals
-        </p>
-      </header>
-
+      <h1 className="sr-only">Ontology</h1>
       <div className={PAGE_GRID_CLASSES}>
         <OntologyIndex onSelect={selectWithHash} selection={selection} />
         <RelationshipPanel onSelect={selectWithHash} selected={selected} />
